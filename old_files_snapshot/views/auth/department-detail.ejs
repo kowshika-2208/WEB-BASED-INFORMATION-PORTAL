@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> | CIP</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <script defer src="/js/theme.js"></script>
+</head>
+<body class="landing-page page-department-detail">
+  <header class="landing-nav-wrap">
+    <nav class="landing-nav">
+      <a class="brand-mark" href="/">
+        <span class="brand-icon">&#127891;</span>
+        <span><%= home.collegeName %></span>
+      </a>
+      <div class="landing-links">
+        <a href="/">Home</a>
+        <a href="/about-college">About</a>
+        <a class="active" href="/departments">Departments</a>
+        <a href="/faculty">Faculty</a>
+        <a href="/placements">Placements</a>
+        <a href="/login">Login</a>
+        <a href="/contact">Contact</a>
+        <span class="mode-icon">&#9789;</span>
+      </div>
+    </nav>
+  </header>
+
+  <section class="department-detail-hero" style="background-image: linear-gradient(95deg, rgba(20, 12, 41, 0.8), rgba(62, 30, 111, 0.7)), url('<%= department.bannerImage %>');">
+    <div class="department-detail-hero-inner">
+      <p><a href="/">Home</a> <span>&gt;</span> <a href="/departments">Departments</a> <span>&gt;</span> <strong><%= department.short %></strong></p>
+      <div class="department-title-block">
+        <h1><%= department.name %></h1>
+      </div>
+    </div>
+  </section>
+
+  <main class="department-detail-screen">
+    <section class="department-detail-layout">
+      <div class="department-detail-main">
+        <article class="department-section-card">
+          <h2>Overview</h2>
+          <p><%= department.overview %></p>
+        </article>
+
+        <article class="department-section-card">
+          <h2>Vision</h2>
+          <p><%= department.vision %></p>
+        </article>
+
+        <article class="department-section-card">
+          <h2>Mission</h2>
+          <ol>
+            <% department.mission.forEach(item => { %>
+              <li><%= item %></li>
+            <% }) %>
+          </ol>
+        </article>
+
+        <article class="department-section-card">
+          <h2>PEO</h2>
+          <ol>
+            <% department.peo.forEach(item => { %>
+              <li><%= item %></li>
+            <% }) %>
+          </ol>
+        </article>
+
+        <article class="department-section-card">
+          <h2>Programmes Offered</h2>
+          <div class="programme-tabs">
+            <% department.programmes.forEach(programme => { %>
+              <span class="programme-pill"><%= programme.level %></span>
+            <% }) %>
+          </div>
+          <div class="programme-list">
+            <% department.programmes.forEach(programme => { %>
+              <section class="programme-card">
+                <h3><%= programme.name %></h3>
+                <div class="programme-grid">
+                  <div>
+                    <h4>Duration</h4>
+                    <p><%= programme.duration %></p>
+                  </div>
+                  <div>
+                    <h4>No. of Semesters</h4>
+                    <p><%= programme.semesters %></p>
+                  </div>
+                  <div>
+                    <h4>No. of Seats</h4>
+                    <p><%= programme.seats %></p>
+                  </div>
+                  <div>
+                    <h4>Eligibility</h4>
+                    <p><%= programme.eligibility %></p>
+                  </div>
+                  <div>
+                    <h4>Syllabus</h4>
+                    <p class="programme-tag-row">
+                      <% programme.syllabusYears.forEach(year => { %>
+                        <span><%= year %></span>
+                      <% }) %>
+                    </p>
+                  </div>
+                  <div>
+                    <h4>Scope for Higher Studies</h4>
+                    <p><%= programme.higherStudies %></p>
+                  </div>
+                </div>
+              </section>
+            <% }) %>
+          </div>
+        </article>
+      </div>
+
+      <aside class="department-detail-sidebar">
+        <article class="sidebar-panel">
+          <h3>HOD</h3>
+          <p><strong><%= department.hod.name %></strong></p>
+          <p><%= department.hod.designation %></p>
+          <p><%= department.hod.email %></p>
+          <p><%= department.hod.phone %></p>
+          <p class="hod-msg"><%= department.hod.message %></p>
+        </article>
+
+        <article class="sidebar-panel">
+          <h3>Faculty & Staff</h3>
+          <h4>Faculty Members</h4>
+          <ul>
+            <% department.facultyMembers.forEach(member => { %>
+              <li><strong><%= member.name %></strong><br><span><%= member.designation %> | <%= member.specialization %></span></li>
+            <% }) %>
+          </ul>
+          <h4>Supporting Staff</h4>
+          <ul>
+            <% department.supportingStaff.forEach(item => { %>
+              <li><%= item %></li>
+            <% }) %>
+          </ul>
+        </article>
+
+        <article class="sidebar-panel">
+          <h3>Research & Consultancy</h3>
+          <ul>
+            <% department.researchFocus.forEach(item => { %>
+              <li><%= item %></li>
+            <% }) %>
+          </ul>
+        </article>
+      </aside>
+    </section>
+  </main>
+
+  <footer class="landing-footer">
+    <div class="footer-grid">
+      <div>
+        <h3><span class="brand-icon">&#127891;</span> <%= home.collegeName %></h3>
+        <p>Empowering students with quality education since 1985. Shaping the leaders of tomorrow.</p>
+      </div>
+      <div>
+        <h4>Quick Links</h4>
+        <a href="/about-college">About Us</a>
+        <a href="/departments">Departments</a>
+        <a href="/faculty">Faculty</a>
+        <a href="/placements">Placements</a>
+        <a href="/contact">Contact</a>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <p>&#128205; <%= home.contact.address %></p>
+        <p>&#9742; <%= home.contact.phone %></p>
+        <p>&#9993; <%= home.contact.email %></p>
+      </div>
+      <div>
+        <h4>Follow Us</h4>
+        <p>Facebook</p>
+        <p>Twitter</p>
+        <p>Instagram</p>
+        <p>LinkedIn</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; 2026 <%= home.collegeName %>. All rights reserved.
+    </div>
+  </footer>
+</body>
+</html>
+

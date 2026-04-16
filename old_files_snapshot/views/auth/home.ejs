@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> | CIP</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <script defer src="/js/theme.js"></script>
+  <script defer src="/js/homeAnnouncements.js"></script>
+</head>
+<body class="landing-page page-home">
+  <header class="landing-nav-wrap">
+    <nav class="landing-nav">
+      <a class="brand-mark" href="/">
+        <span class="brand-icon">&#127891;</span>
+        <span><%= home.collegeName %></span>
+      </a>
+      <div class="landing-links">
+        <a class="active" href="/">Home</a>
+        <a href="/about-college">About</a>
+        <a href="/departments">Departments</a>
+        <a href="/faculty">Faculty</a>
+        <a href="/placements">Placements</a>
+        <a href="/login">Login</a>
+        <a href="/contact">Contact</a>
+        <span class="mode-icon">&#9789;</span>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero-panel home-campus-hero">
+      <button class="hero-arrow" type="button">&#10094;</button>
+      <div class="hero-copy">
+        <h1><%= home.heroTitle %></h1>
+        <p><%= home.heroSubtitle %></p>
+        <div class="hero-actions">
+          <a class="btn hero-btn" href="/departments">Explore Departments</a>
+          <a class="btn hero-btn light" href="/contact">Contact Us</a>
+        </div>
+      </div>
+      <button class="hero-arrow" type="button">&#10095;</button>
+    </section>
+
+    <section class="stats-row">
+      <% home.stats.forEach(stat => { %>
+        <article class="stats-card">
+          <div class="stats-icon">
+            <% if (stat.icon === 'book') { %>&#128214;<% } %>
+            <% if (stat.icon === 'users') { %>&#128101;<% } %>
+            <% if (stat.icon === 'award') { %>&#127942;<% } %>
+          </div>
+          <h3><%= stat.value %></h3>
+          <p><%= stat.label %></p>
+        </article>
+      <% }) %>
+    </section>
+
+    <section class="announce-wrap">
+      <h2>Latest Announcements</h2>
+      <div class="announce-grid">
+        <% home.announcements.forEach((item, idx) => { %>
+          <button
+            type="button"
+            class="announce-card announce-card-action <%= idx === 0 ? 'is-active' : '' %>"
+            data-title="<%= item.title %>"
+            data-date="<%= item.date %>"
+            data-detail="<%= item.detail %>"
+            data-status="<%= item.status || 'Update' %>"
+            data-time="<%= item.time || 'TBA' %>"
+            data-venue="<%= item.venue || 'Campus' %>"
+            data-cta="<%= item.cta || '' %>"
+            aria-pressed="<%= idx === 0 ? 'true' : 'false' %>"
+          >
+            <div class="announce-icon <%= idx === 1 ? 'primary' : '' %>">&#128276;</div>
+            <div>
+              <h3><%= item.title %></h3>
+              <p class="announce-date"><%= item.date %></p>
+              <p><%= item.detail %></p>
+            </div>
+          </button>
+        <% }) %>
+      </div>
+
+      <section class="announce-detail-panel" aria-live="polite">
+        <div class="announce-detail-head">
+          <p class="announce-detail-date" id="announceDetailDate"></p>
+          <span class="announce-status-pill" id="announceStatusPill"></span>
+        </div>
+        <h3 id="announceDetailTitle"></h3>
+        <p id="announceDetailText"></p>
+        <div class="announce-meta-grid">
+          <article>
+            <h4>Time</h4>
+            <p id="announceDetailTime"></p>
+          </article>
+          <article>
+            <h4>Venue</h4>
+            <p id="announceDetailVenue"></p>
+          </article>
+        </div>
+        <p class="announce-detail-cta" id="announceDetailCta"></p>
+      </section>
+    </section>
+
+    <section id="courses" class="anchor-block"></section>
+  </main>
+
+  <footer class="landing-footer">
+    <div class="footer-grid">
+      <div>
+        <h3><span class="brand-icon">&#127891;</span> <%= home.collegeName %></h3>
+        <p>Empowering students with quality education since 1985. Shaping the leaders of tomorrow.</p>
+      </div>
+      <div>
+        <h4>Quick Links</h4>
+        <a href="/about-college">About Us</a>
+        <a href="/departments">Departments</a>
+        <a href="/faculty">Faculty</a>
+        <a href="/placements">Placements</a>
+        <a href="/contact">Contact</a>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <p>&#128205; <%= home.contact.address %></p>
+        <p>&#9742; <%= home.contact.phone %></p>
+        <p>&#9993; <%= home.contact.email %></p>
+      </div>
+      <div>
+        <h4>Follow Us</h4>
+        <p>Facebook</p>
+        <p>Twitter</p>
+        <p>Instagram</p>
+        <p>LinkedIn</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; 2026 <%= home.collegeName %>. All rights reserved.
+    </div>
+  </footer>
+</body>
+</html>
+
+
+

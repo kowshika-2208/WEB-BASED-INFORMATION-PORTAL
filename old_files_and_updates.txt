@@ -1,0 +1,60 @@
+
+FullName                                      LastWriteTime       Length
+--------                                      -------------       ------
+C:\dev\cip\.env.example                       27-02-2026 09:44:30    150
+C:\dev\cip\config\db.js                       27-02-2026 09:44:30    333
+C:\dev\cip\middleware\authMiddleware.js       27-02-2026 09:44:30    887
+C:\dev\cip\middleware\validationMiddleware.js 27-02-2026 09:44:30    402
+C:\dev\cip\models\userModel.js                27-02-2026 09:45:21    454
+C:\dev\cip\views\partials\error.ejs           27-02-2026 09:47:47    420
+C:\dev\cip\public\js\charts.js                27-02-2026 09:48:17   1275
+C:\dev\cip\package.json                       27-02-2026 09:48:37    770
+C:\dev\cip\README.md                          27-02-2026 09:49:41   1269
+C:\dev\cip\.gitignore                         27-02-2026 09:49:41     33
+C:\dev\cip\.env                               27-02-2026 10:00:07    146
+C:\dev\cip\views\student\academics.ejs        27-02-2026 10:14:00   1720
+C:\dev\cip\views\student\fees.ejs             27-02-2026 10:14:00    899
+C:\dev\cip\views\student\leaves.ejs           27-02-2026 10:14:00   1322
+C:\dev\cip\views\student\hall-ticket.ejs      27-02-2026 10:14:00    904
+C:\dev\cip\views\admin\students.ejs           27-02-2026 10:24:42   2780
+C:\dev\cip\views\admin\faculty.ejs            27-02-2026 10:24:42   1740
+C:\dev\cip\views\admin\operations.ejs         27-02-2026 10:24:42   1490
+C:\dev\cip\views\admin\reports.ejs            27-02-2026 10:24:42    908
+C:\dev\cip\views\faculty\dashboard.ejs        27-02-2026 10:25:17    806
+C:\dev\cip\views\faculty\marks.ejs            27-02-2026 10:25:17   1204
+C:\dev\cip\views\faculty\attendance.ejs       27-02-2026 10:25:17   1057
+C:\dev\cip\views\faculty\analytics.ejs        27-02-2026 10:25:17    819
+C:\dev\cip\models\facultyModel.js             27-02-2026 11:25:59   5244
+C:\dev\cip\controllers\facultyController.js   27-02-2026 11:26:25   4481
+C:\dev\cip\routes\facultyRoutes.js            27-02-2026 11:26:40   1961
+C:\dev\cip\views\faculty\leaves.ejs           27-02-2026 11:27:22   2282
+C:\dev\cip\views\faculty\students.ejs         27-02-2026 11:27:22   1760
+C:\dev\cip\views\faculty\student-details.ejs  27-02-2026 11:27:22   2893
+C:\dev\cip\app.js                             27-02-2026 14:18:39   1826
+C:\dev\cip\package-lock.json                  27-02-2026 14:26:45  87146
+C:\dev\cip\routes\authRoutes.js               27-02-2026 14:33:48    857
+C:\dev\cip\views\auth\courses.ejs             27-02-2026 14:34:10   2766
+C:\dev\cip\views\auth\home.ejs                27-02-2026 14:34:25   3523
+C:\dev\cip\views\auth\about-college.ejs       27-02-2026 14:34:25   4532
+C:\dev\cip\views\auth\departments.ejs         27-02-2026 14:34:26   2716
+C:\dev\cip\views\auth\login.ejs               27-02-2026 14:38:14   4591
+C:\dev\cip\views\partials\layout-bottom.ejs   27-02-2026 14:44:54     66
+C:\dev\cip\controllers\authController.js      27-02-2026 14:49:18   9748
+C:\dev\cip\views\auth\contact.ejs             27-02-2026 14:55:34   3164
+C:\dev\cip\views\student\personal.ejs         27-02-2026 15:42:56   2277
+C:\dev\cip\sql\schema.sql                     27-02-2026 15:56:30   3332
+C:\dev\cip\models\studentModel.js             27-02-2026 15:56:43   5169
+C:\dev\cip\models\adminModel.js               27-02-2026 15:56:55   2885
+C:\dev\cip\controllers\studentController.js   27-02-2026 15:57:06   4580
+C:\dev\cip\controllers\adminController.js     27-02-2026 15:57:21   4563
+C:\dev\cip\views\partials\layout-top.ejs      27-02-2026 15:57:54   3637
+C:\dev\cip\views\admin\queries.ejs            27-02-2026 15:58:29   1738
+C:\dev\cip\views\admin\dashboard.ejs          27-02-2026 15:58:42   1722
+C:\dev\cip\public\css\style.css               27-02-2026 15:58:53  19939
+C:\dev\cip\sql\seed.js                        27-02-2026 15:59:41   7016
+C:\dev\cip\routes\adminRoutes.js              27-02-2026 15:59:53   2258
+C:\dev\cip\routes\studentRoutes.js            27-02-2026 16:08:32   1596
+C:\dev\cip\views\student\dashboard.ejs        27-02-2026 16:08:44   2860
+
+
+

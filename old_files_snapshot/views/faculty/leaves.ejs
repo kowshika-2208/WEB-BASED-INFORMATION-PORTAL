@@ -1,0 +1,81 @@
+<%- include('../partials/layout-top', { title, user, activeSection }) %>
+
+<section class="header-row"><h1>Leave Applications</h1></section>
+
+<section class="grid cards-3">
+  <div class="card">
+    <h3>Pending Requests</h3>
+    <p><%= data.pendingLeaves.length %></p>
+  </div>
+  <div class="card">
+    <h3>Approved</h3>
+    <p><%= (data.allLeaveRequests || []).filter((l) => l.status === 'Approved').length %></p>
+  </div>
+  <div class="card">
+    <h3>Cancelled</h3>
+    <p><%= (data.allLeaveRequests || []).filter((l) => l.status === 'Rejected').length %></p>
+  </div>
+</section>
+
+<section class="card">
+  <h3>Student Leave Requests (Pending / Approved / Cancelled)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Student</th>
+        <th>Reason</th>
+        <th>From</th>
+        <th>To</th>
+        <th>Status</th>
+        <th>Action</th>
+        <th>Profile</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% (data.allLeaveRequests || []).forEach(l => { %>
+        <tr>
+          <td><strong><%= l.student_name %></strong><br /><small>ID: <%= l.student_id %></small></td>
+          <td><%= l.reason %></td>
+          <td><%= new Date(l.from_date).toLocaleDateString() %></td>
+          <td><%= new Date(l.to_date).toLocaleDateString() %></td>
+          <td><span class="query-pill <%= String(l.status || '').toLowerCase() === 'approved' ? 'resolved' : String(l.status || '').toLowerCase() === 'rejected' ? 'unread' : 'read' %>"><%= l.status === 'Rejected' ? 'Cancelled' : l.status %></span></td>
+          <td>
+            <form method="POST" action="/faculty/leave-status" class="stack-form">
+              <input type="hidden" name="leave_id" value="<%= l.id %>" />
+              <select name="status">
+                <option value="Pending" <%= l.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                <option value="Approved" <%= l.status === 'Approved' ? 'selected' : '' %>>Approve</option>
+                <option value="Rejected" <%= l.status === 'Rejected' ? 'selected' : '' %>>Cancel</option>
+              </select>
+              <button type="submit">Update</button>
+            </form>
+          </td>
+          <td><a class="btn" href="/faculty/students/<%= l.student_id %>">View Student</a></td>
+        </tr>
+      <% }) %>
+      <% if (!data.allLeaveRequests || data.allLeaveRequests.length === 0) { %>
+        <tr><td colspan="7">No leave requests found.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</section>
+
+<section class="card">
+  <h3>Other Assigned Students (No Pending Leave)</h3>
+  <table>
+    <thead><tr><th>Student ID</th><th>Name</th><th>Department</th><th>Semester</th><th>Profile</th></tr></thead>
+    <tbody>
+      <% data.students.filter(s => !data.pendingLeaves.some(l => Number(l.student_id) === Number(s.student_id))).forEach(s => { %>
+        <tr>
+          <td><%= s.student_id %></td>
+          <td><%= s.name %></td>
+          <td><%= s.department %></td>
+          <td><%= s.semester %></td>
+          <td><a class="btn" href="/faculty/students/<%= s.student_id %>">View Student</a></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</section>
+
+<%- include('../partials/layout-bottom') %>

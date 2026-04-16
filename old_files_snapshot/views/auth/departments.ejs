@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> | CIP</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <script defer src="/js/theme.js"></script>
+</head>
+<body class="landing-page page-departments">
+  <header class="landing-nav-wrap">
+    <nav class="landing-nav">
+      <a class="brand-mark" href="/">
+        <span class="brand-icon">&#127891;</span>
+        <span><%= home.collegeName %></span>
+      </a>
+      <div class="landing-links">
+        <a href="/">Home</a>
+        <a href="/about-college">About</a>
+        <a class="active" href="/departments">Departments</a>
+        <a href="/faculty">Faculty</a>
+        <a href="/placements">Placements</a>
+        <a href="/login">Login</a>
+        <a href="/contact">Contact</a>
+        <span class="mode-icon">&#9789;</span>
+      </div>
+    </nav>
+  </header>
+
+  <section class="departments-hero">
+    <div class="departments-hero-overlay">
+      <h1>DEPARTMENTS</h1>
+      <p><a href="/">Home</a> <span>&gt;</span> <strong>Departments</strong></p>
+    </div>
+  </section>
+
+  <main class="departments-screen">
+    <section class="about-intro departments-intro">
+      <h2>Explore Academic Departments</h2>
+      <p>Choose from our wide range of engineering, science, and management programs.</p>
+    </section>
+
+    <section class="departments-grid departments-grid-modern">
+      <% home.departments.forEach(dep => { %>
+        <a class="department-link-card" href="/departments/<%= dep.slug %>">
+          <article class="department-card department-card-modern">
+            <div class="department-icon-ring">
+              <div class="department-icon"><%- dep.icon %></div>
+            </div>
+            <h3 class="department-title"><%= dep.name %></h3>
+            <p class="department-short"><%= dep.short %></p>
+            <p class="department-detail"><%= dep.detail %></p>
+          </article>
+        </a>
+      <% }) %>
+    </section>
+
+    <section id="courses" class="anchor-block"></section>
+  </main>
+
+  <footer class="landing-footer">
+    <div class="footer-grid">
+      <div>
+        <h3><span class="brand-icon">&#127891;</span> <%= home.collegeName %></h3>
+        <p>Empowering students with quality education since 1985. Shaping the leaders of tomorrow.</p>
+      </div>
+      <div>
+        <h4>Quick Links</h4>
+        <a href="/about-college">About Us</a>
+        <a href="/departments">Departments</a>
+        <a href="/faculty">Faculty</a>
+        <a href="/placements">Placements</a>
+        <a href="/contact">Contact</a>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <p>&#128205; <%= home.contact.address %></p>
+        <p>&#9742; <%= home.contact.phone %></p>
+        <p>&#9993; <%= home.contact.email %></p>
+      </div>
+      <div>
+        <h4>Follow Us</h4>
+        <p>Facebook</p>
+        <p>Twitter</p>
+        <p>Instagram</p>
+        <p>LinkedIn</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; 2026 <%= home.collegeName %>. All rights reserved.
+    </div>
+  </footer>
+</body>
+</html>
+
+
+
+

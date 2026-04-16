@@ -1,0 +1,48 @@
+<%- include('../partials/layout-top', { title, user, activeSection }) %>
+
+<section class="header-row"><h1>Academic Details</h1></section>
+
+<section class="grid cards-2">
+  <div class="card">
+    <h3>Semester-wise CGPA</h3>
+    <canvas id="studentCgpaChart" data-labels='<%- JSON.stringify(data.semesterCgpa.map(d => `Sem ${d.semester}`)) %>' data-values='<%- JSON.stringify(data.semesterCgpa.map(d => d.cgpa)) %>'></canvas>
+  </div>
+  <div class="card">
+    <h3>Performance Summary</h3>
+    <p>Total Subjects: <%= data.marks.length %></p>
+    <p>Average Attendance: <%= data.attendance.length ? (data.attendance.reduce((sum, a) => sum + Number(a.attendance_percentage), 0) / data.attendance.length).toFixed(2) : 'N/A' %>%</p>
+    <p>Current Semester: <%= data.profile.semester %></p>
+  </div>
+</section>
+
+<section class="card">
+  <h3>Attendance Records</h3>
+  <table>
+    <thead><tr><th>Semester</th><th>Attendance %</th></tr></thead>
+    <tbody>
+      <% data.attendance.forEach(row => { %>
+        <tr><td><%= row.semester %></td><td><%= row.attendance_percentage %></td></tr>
+      <% }) %>
+    </tbody>
+  </table>
+</section>
+
+<section class="card">
+  <h3>Subject Marks</h3>
+  <table>
+    <thead><tr><th>Semester</th><th>Subject</th><th>Internal</th><th>External</th><th>Total</th></tr></thead>
+    <tbody>
+      <% data.marks.forEach(row => { %>
+        <tr>
+          <td><%= row.semester %></td>
+          <td><%= row.subject %></td>
+          <td><%= row.internal_marks %></td>
+          <td><%= row.external_marks %></td>
+          <td><%= Number(row.internal_marks) + Number(row.external_marks) %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</section>
+
+<%- include('../partials/layout-bottom') %>

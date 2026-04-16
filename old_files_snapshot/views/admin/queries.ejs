@@ -1,0 +1,49 @@
+<%- include('../partials/layout-top', { title, user, activeSection, unreadQueryCount }) %>
+
+<section class="header-row"><h1>Student Queries</h1></section>
+
+<section class="card">
+  <h3>Inbox</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Student</th>
+        <th>Department</th>
+        <th>Subject</th>
+        <th>Message</th>
+        <th>Status</th>
+        <th>Date</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% queries.forEach(q => { %>
+        <tr>
+          <td><%= q.id %></td>
+          <td><strong><%= q.student_name %></strong><br /><small><%= q.student_email %></small></td>
+          <td><%= q.department %> (Sem <%= q.semester %>)</td>
+          <td><%= q.subject %></td>
+          <td><%= q.message %></td>
+          <td><span class="query-pill <%= String(q.status || '').toLowerCase() %>"><%= q.status %></span></td>
+          <td><%= new Date(q.created_at).toLocaleString() %></td>
+          <td>
+            <form method="POST" action="/admin/queries/<%= q.id %>/status" class="stack-form">
+              <select name="status">
+                <option value="Unread" <%= q.status === 'Unread' ? 'selected' : '' %>>Unread</option>
+                <option value="Read" <%= q.status === 'Read' ? 'selected' : '' %>>Read</option>
+                <option value="Resolved" <%= q.status === 'Resolved' ? 'selected' : '' %>>Resolved</option>
+              </select>
+              <button type="submit">Update</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+      <% if (!queries.length) { %>
+        <tr><td colspan="8">No student queries found.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</section>
+
+<%- include('../partials/layout-bottom') %>

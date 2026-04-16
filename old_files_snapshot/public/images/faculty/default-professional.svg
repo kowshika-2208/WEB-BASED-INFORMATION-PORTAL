@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Professional faculty avatar">
+  <rect width="256" height="256" rx="28" fill="#eef2ff"/>
+  <circle cx="128" cy="84" r="34" fill="#c7d2fe"/>
+  <path d="M68 214c6-38 30-56 60-56s54 18 60 56" fill="#a5b4fc"/>
+  <path d="M96 151l32 20 32-20v53H96z" fill="#4b2a6f"/>
+  <path d="M128 171l11 16-11 34-11-34z" fill="#f8fafc"/>
+  <path d="M80 62l48-23 48 23-48 22z" fill="#4b2a6f"/>
+  <path d="M168 71v28" stroke="#4b2a6f" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="168" cy="105" r="6" fill="#4b2a6f"/>
+</svg>

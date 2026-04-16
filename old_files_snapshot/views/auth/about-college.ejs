@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> | CIP</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <script defer src="/js/theme.js"></script>
+  <script defer src="/js/aboutFacilities.js"></script>
+</head>
+<body class="landing-page page-about">
+  <header class="landing-nav-wrap">
+    <nav class="landing-nav">
+      <a class="brand-mark" href="/">
+        <span class="brand-icon">&#127891;</span>
+        <span><%= home.collegeName %></span>
+      </a>
+      <div class="landing-links">
+        <a href="/">Home</a>
+        <a class="active" href="/about-college">About</a>
+        <a href="/departments">Departments</a>
+        <a href="/faculty">Faculty</a>
+        <a href="/placements">Placements</a>
+        <a href="/login">Login</a>
+        <a href="/contact">Contact</a>
+        <span class="mode-icon">&#9789;</span>
+      </div>
+    </nav>
+  </header>
+
+  <main class="about-screen">
+    <section class="about-intro">
+      <h1>About <%= home.collegeName %></h1>
+      <p>
+        Established in 1985, <%= home.collegeName %> has been a beacon of academic excellence for over four decades.
+        Our institution is committed to nurturing talent, fostering innovation, and building leaders who make a
+        difference in the world.
+      </p>
+    </section>
+
+    <section class="vision-grid">
+      <article class="vision-card">
+        <div class="vision-head">
+          <div class="vision-icon">&#128065;</div>
+          <h2>Our Vision</h2>
+        </div>
+        <p>To be a globally recognized institution of higher learning that inspires academic excellence, innovation, and leadership among students.</p>
+      </article>
+      <article class="vision-card">
+        <div class="vision-head">
+          <div class="vision-icon">&#127919;</div>
+          <h2>Our Mission</h2>
+        </div>
+        <p>To provide quality education through innovative teaching, cutting-edge research, and community engagement, preparing students for global challenges.</p>
+      </article>
+    </section>
+
+    <section class="facilities-block">
+      <h2>Campus Facilities</h2>
+      <div class="facility-grid">
+        <button type="button" class="facility-card facility-card-action is-active" data-facility="library" aria-pressed="true">
+          <div class="facility-icon">&#128214;</div>
+          <h3>Library</h3>
+          <p>Over 50,000 books and digital resources</p>
+        </button>
+        <button type="button" class="facility-card facility-card-action" data-facility="laboratories" aria-pressed="false">
+          <div class="facility-icon">&#129514;</div>
+          <h3>Laboratories</h3>
+          <p>State-of-the-art labs for every department</p>
+        </button>
+        <button type="button" class="facility-card facility-card-action" data-facility="smart-campus" aria-pressed="false">
+          <div class="facility-icon">&#128246;</div>
+          <h3>Smart Campus</h3>
+          <p>Campus-wide Wi-Fi and digital infrastructure</p>
+        </button>
+        <button type="button" class="facility-card facility-card-action" data-facility="sports-complex" aria-pressed="false">
+          <div class="facility-icon">&#127947;</div>
+          <h3>Sports Complex</h3>
+          <p>Indoor and outdoor sports facilities</p>
+        </button>
+        <button type="button" class="facility-card facility-card-action" data-facility="research-center" aria-pressed="false">
+          <div class="facility-icon">&#128213;</div>
+          <h3>Research Center</h3>
+          <p>Dedicated research labs and funding support</p>
+        </button>
+        <button type="button" class="facility-card facility-card-action featured" data-facility="auditorium" aria-pressed="false">
+          <div class="facility-icon">&#127915;</div>
+          <h3>Auditorium</h3>
+          <p>1500-seat auditorium for events and seminars</p>
+        </button>
+      </div>
+
+      <section class="facility-detail-panel" id="facilityDetailPanel" aria-live="polite">
+        <div class="facility-detail-main">
+          <p class="facility-detail-kicker">Facility Spotlight</p>
+          <h3 id="facilityDetailTitle">Central Library</h3>
+          <p id="facilityDetailSummary">The central library supports academic learning with extensive print and digital collections, collaborative reading spaces, and remote-access e-journals.</p>
+          <ul id="facilityDetailHighlights"></ul>
+          <div class="facility-detail-columns">
+            <article>
+              <h4>Core Services</h4>
+              <ul id="facilityDetailServices"></ul>
+            </article>
+            <article>
+              <h4>Infrastructure</h4>
+              <ul id="facilityDetailInfra"></ul>
+            </article>
+          </div>
+          <div class="facility-detail-columns">
+            <article>
+              <h4>Operating Hours</h4>
+              <ul id="facilityDetailTimings"></ul>
+            </article>
+            <article>
+              <h4>Student Outcomes</h4>
+              <ul id="facilityDetailOutcomes"></ul>
+            </article>
+          </div>
+          <p class="facility-detail-contact" id="facilityDetailContact"></p>
+        </div>
+        <aside class="facility-detail-stats">
+          <h4>At a Glance</h4>
+          <div id="facilityDetailStats"></div>
+        </aside>
+      </section>
+    </section>
+
+    <section class="about-metrics">
+      <article class="metric-card">
+        <h3>45+</h3>
+        <p>Smart Classrooms</p>
+      </article>
+      <article class="metric-card">
+        <h3>12</h3>
+        <p>Research Labs</p>
+      </article>
+      <article class="metric-card">
+        <h3>24x7</h3>
+        <p>Campus Wi-Fi</p>
+      </article>
+      <article class="metric-card">
+        <h3>1500</h3>
+        <p>Auditorium Capacity</p>
+      </article>
+    </section>
+
+    <section class="extended-facilities">
+      <h2>Academic Infrastructure</h2>
+      <div class="facility-list-grid">
+        <article class="facility-list-card">
+          <h3>Innovation & Incubation Center</h3>
+          <p>Startup mentoring, prototyping tools, and regular industry-guided project reviews.</p>
+        </article>
+        <article class="facility-list-card">
+          <h3>Center for Advanced Computing</h3>
+          <p>High-performance systems for AI, data analytics, simulation, and cloud practice labs.</p>
+        </article>
+        <article class="facility-list-card">
+          <h3>Digital Learning Studio</h3>
+          <p>Lecture capture, virtual classroom production, and blended learning support.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="extended-facilities">
+      <h2>Student Support Facilities</h2>
+      <div class="facility-list-grid">
+        <article class="facility-list-card">
+          <h3>Career Development Cell</h3>
+          <p>Placement training, mock interviews, aptitude preparation, and corporate mentoring.</p>
+        </article>
+        <article class="facility-list-card">
+          <h3>Counseling & Wellness Center</h3>
+          <p>Professional counseling, stress support sessions, and student wellbeing programs.</p>
+        </article>
+        <article class="facility-list-card">
+          <h3>Scholarship & Financial Aid Desk</h3>
+          <p>Guidance for merit scholarships, fee concessions, and government schemes.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="extended-facilities">
+      <h2>Campus Life</h2>
+      <div class="facility-list-grid">
+        <article class="facility-list-card">
+          <h3>Hostel & Dining</h3>
+          <p>Separate hostels, hygienic mess facilities, reading halls, and recreation zones.</p>
+        </article>
+        <article class="facility-list-card">
+          <h3>Sports & Fitness Arena</h3>
+          <p>Indoor courts, outdoor grounds, gymnasium, and inter-college sports training.</p>
+        </article>
+        <article class="facility-list-card">
+          <h3>Clubs & Technical Communities</h3>
+          <p>Active coding clubs, robotics teams, cultural forums, and leadership communities.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="courses" class="anchor-block"></section>
+  </main>
+
+  <footer class="landing-footer">
+    <div class="footer-grid">
+      <div>
+        <h3><span class="brand-icon">&#127891;</span> <%= home.collegeName %></h3>
+        <p>Empowering students with quality education since 1985. Shaping the leaders of tomorrow.</p>
+      </div>
+      <div>
+        <h4>Quick Links</h4>
+        <a href="/about-college">About Us</a>
+        <a href="/departments">Departments</a>
+        <a href="/faculty">Faculty</a>
+        <a href="/placements">Placements</a>
+        <a href="/contact">Contact</a>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <p>&#128205; <%= home.contact.address %></p>
+        <p>&#9742; <%= home.contact.phone %></p>
+        <p>&#9993; <%= home.contact.email %></p>
+      </div>
+      <div>
+        <h4>Follow Us</h4>
+        <p>Facebook</p>
+        <p>Twitter</p>
+        <p>Instagram</p>
+        <p>LinkedIn</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; 2026 <%= home.collegeName %>. All rights reserved.
+    </div>
+  </footer>
+</body>
+</html>
+
+
+

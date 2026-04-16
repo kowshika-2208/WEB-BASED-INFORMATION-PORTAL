@@ -1,0 +1,86 @@
+ 190: Unblock-File -Path "C:\Users\kowsi\Downloads\cip\*"`
+ 191: 
+ 192: Get-ChildItem "C:\Users\kowsi\Downloads\cip" -Recurse -File | Unblock-File`
+ 193: 
+ 194: icacls "C:\Users\kowsi\Downloads\cip" /grant "$env:USERNAME:(OI)(CI)F" /T`
+ 195: 
+ 196: attrib -R "C:\Users\kowsi\Downloads\cip" /S /D`
+ 197: 
+ 198: mkdir C:\dev\cip`
+ 199: 
+ 200: cd C:\dev\cip`
+ 201: Get-Date`
+ 202: Get-ChildItem`
+ 203: ni test.txt -ItemType File`
+ 204: Remove-Item test.txt`
+ 205: 
+ 206: icacls "C:\dev\cip" /grant "$env:USERNAME:(OI)(CI)F" /T`
+ 207: attrib -R "C:\dev\cip" /S /D`
+ 208: 
+ 209: cd C:\dev\cip`
+ 210: Copy-Item .env.example .env`
+ 211: npm install`
+ 212: npm run dev`
+ 213: 
+ 214: cd C:\dev\cip`
+ 215: notepad .env`
+ 216: 
+ 217: DB_HOST=localhost
+ 218: DB_USER=root
+ 219: DB_NAME=cip_db
+ 220: DB_PORT=3306
+ 221: JWT_EXPIRES_IN=1d
+ 222: PORT=3000
+ 223: cd C:\dev\cip
+ 224: notepad .env
+ 225: PORT=3000
+ 226: DB_HOST=localhost
+ 227: DB_USER=root
+ 228: DB_NAME=cip_db
+ 229: DB_PORT=3306
+ 230: JWT_EXPIRES_IN=1d
+ 231: cd C:\dev\cip
+ 232: npm run dev
+ 233: cd C:\dev\cip`
+ 234: npm run dev`
+ 235: 
+ 236: cd C:\dev\cip`
+ 237: npm run seed`
+ 238: npm run dev`
+ 239: 
+ 240: cd C:\dev\cip`
+ 241: npm run dev`
+ 242: 
+ 243: python -m http.server 5500`
+ 244: 
+ 245: cd campus-connect-hub`
+ 246: npm run dev`
+ 247: 
+ 248: cd C:\dev\cip`
+ 249: npm start`
+ 250: 
+ 251: cd C:\dev\cip`
+ 252: npm install`
+ 253: npm start`
+ 254: 
+ 255: cd C:\dev\cip`
+ 256: npm start`
+ 257: 
+ 258: cd C:\dev\cip
+ 259: npm start
+ 260: cd C:\dev\cip`
+ 261: npm start`
+ 262: 
+ 263: cd C:\dev\cip
+ 264: npm start
+ 265: cd C:\dev\cip`
+ 266: npm start`
+ 267: 
+ 268: npm start`
+ 269: 
+ 270: cd C:\dev\cip`
+ 271: mysql -u root -p cip_db < sql\schema.sql`
+ 272: 
+ 273: cd C:\dev\cip`
+ 274: npm start`
+ 275: 

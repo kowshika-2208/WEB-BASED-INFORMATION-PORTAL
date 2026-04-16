@@ -1,0 +1,35 @@
+<%- include('../partials/layout-top', { title, user, activeSection }) %>
+
+<section class="header-row"><h1>Leave Management</h1></section>
+
+<section class="grid cards-2">
+  <div class="card">
+    <h3>Apply Leave</h3>
+    <form method="POST" action="/student/leave" class="stack-form">
+      <textarea name="reason" placeholder="Reason" required></textarea>
+      <input type="date" name="from_date" required />
+      <input type="date" name="to_date" required />
+      <button type="submit">Submit Leave</button>
+    </form>
+  </div>
+  <div class="card">
+    <h3>Summary</h3>
+    <p>Pending: <%= data.leaves.filter(l => l.status === 'Pending').length %></p>
+    <p>Approved: <%= data.leaves.filter(l => l.status === 'Approved').length %></p>
+    <p>Rejected: <%= data.leaves.filter(l => l.status === 'Rejected').length %></p>
+  </div>
+</section>
+
+<section class="card">
+  <h3>Leave History</h3>
+  <table>
+    <thead><tr><th>Reason</th><th>From</th><th>To</th><th>Status</th></tr></thead>
+    <tbody>
+      <% data.leaves.forEach(row => { %>
+        <tr><td><%= row.reason %></td><td><%= new Date(row.from_date).toLocaleDateString() %></td><td><%= new Date(row.to_date).toLocaleDateString() %></td><td><%= row.status %></td></tr>
+      <% }) %>
+    </tbody>
+  </table>
+</section>
+
+<%- include('../partials/layout-bottom') %>

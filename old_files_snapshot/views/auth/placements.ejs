@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> | CIP</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <script defer src="/js/theme.js"></script>
+  <script defer src="/js/placementsPage.js"></script>
+</head>
+<body class="landing-page page-placements">
+  <header class="landing-nav-wrap">
+    <nav class="landing-nav">
+      <a class="brand-mark" href="/">
+        <span class="brand-icon">&#127891;</span>
+        <span><%= home.collegeName %></span>
+      </a>
+      <div class="landing-links">
+        <a href="/">Home</a>
+        <a href="/about-college">About</a>
+        <a href="/departments">Departments</a>
+        <a href="/faculty">Faculty</a>
+        <a class="active" href="/placements">Placements</a>
+        <a href="/login">Login</a>
+        <a href="/contact">Contact</a>
+        <span class="mode-icon">&#9789;</span>
+      </div>
+    </nav>
+  </header>
+
+  <section class="placements-hero">
+    <div class="placements-hero-inner">
+      <h1>Placement</h1>
+      <p><a href="/">Home</a> <span>&gt;</span> <strong>Placement</strong></p>
+    </div>
+  </section>
+
+  <main class="placements-screen placements-layout">
+    <aside class="placements-nav-panel">
+      <% placements.placementMenu.forEach((menu, index) => { %>
+        <button
+          type="button"
+          class="placements-nav-btn <%= index === 0 ? 'is-active' : '' %>"
+          data-placement-tab="<%= menu.key %>"
+          aria-pressed="<%= index === 0 ? 'true' : 'false' %>"
+        >
+          <%= menu.label %>
+        </button>
+      <% }) %>
+    </aside>
+
+    <section class="placements-content-panel">
+      <article class="placement-tab is-active" data-placement-content="home">
+        <div class="placements-highlight-card">
+          <h2>Training & Placement</h2>
+          <p><%= placements.intro %></p>
+        </div>
+
+        <section class="grid cards-3 placements-stat-grid">
+          <article class="card">
+            <h3>Highest Package</h3>
+            <p><strong><%= placements.overall.highestPackageLpa %> LPA</strong></p>
+          </article>
+          <article class="card">
+            <h3>Average Package</h3>
+            <p><strong><%= placements.overall.averagePackageLpa %> LPA</strong></p>
+          </article>
+          <article class="card">
+            <h3>Overall Placement Rate</h3>
+            <p><strong><%= placements.overall.placementRate %>%</strong></p>
+          </article>
+        </section>
+
+        <section class="card">
+          <h3>Top High Salary Offers</h3>
+          <table class="student-data-table">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Batch</th>
+                <th>Department</th>
+                <th>Company</th>
+                <th>Salary (LPA)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% placements.topOffers.forEach((row) => { %>
+                <tr>
+                  <td><strong><%= row.student %></strong></td>
+                  <td><%= row.batch %></td>
+                  <td><%= row.department %></td>
+                  <td><%= row.company %></td>
+                  <td><%= row.packageLpa %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="card">
+          <h3>Year-wise Placement Details</h3>
+          <table class="student-data-table">
+            <thead>
+              <tr>
+                <th>Year</th>
+                <th>Eligible Students</th>
+                <th>Placed Students</th>
+                <th>Top Company</th>
+                <th>Highest Salary (LPA)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% placements.yearWise.forEach((row) => { %>
+                <tr>
+                  <td><strong><%= row.year %></strong></td>
+                  <td><%= row.eligible %></td>
+                  <td><%= row.placed %></td>
+                  <td><%= row.topCompany %></td>
+                  <td><%= row.highestPackageLpa %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="card">
+          <h3>What Recruiters Say</h3>
+          <div class="placements-quote-grid">
+            <% placements.recruitersSay.forEach((quote) => { %>
+              <blockquote><%= quote %></blockquote>
+            <% }) %>
+          </div>
+        </section>
+      </article>
+
+      <article class="placement-tab" data-placement-content="valuable-recruiters">
+        <section class="recruiters-showcase">
+          <header class="recruiters-showcase-head">
+            <h2>Valuable Recruiters</h2>
+            <p>Leading IT Product Companies</p>
+          </header>
+          <div class="recruiters-board">
+            <div class="recruiters-logo-grid">
+              <% placements.valuableRecruiters.forEach((company) => { %>
+                <article class="recruiter-logo-tile">
+                  <span><%= company %></span>
+                </article>
+              <% }) %>
+            </div>
+          </div>
+        </section>
+      </article>
+
+      <article class="placement-tab" data-placement-content="trainings-offered">
+        <section class="trainings-showcase">
+          <header class="trainings-showcase-head">
+            <h2>Trainings Offered</h2>
+          </header>
+          <div class="trainings-grid">
+            <% placements.trainingCategories.forEach((category) => { %>
+              <article class="training-card">
+                <h3><%= category.title %></h3>
+                <ul>
+                  <% category.items.forEach((item) => { %>
+                    <li><%= item %></li>
+                  <% }) %>
+                </ul>
+              </article>
+            <% }) %>
+          </div>
+        </section>
+      </article>
+
+      <article class="placement-tab" data-placement-content="industry-tieups">
+        <section class="industry-showcase">
+          <header class="industry-showcase-head">
+            <h2>Industry Tieups</h2>
+          </header>
+          <div class="industry-board">
+            <div class="industry-logo-grid">
+              <% placements.industryTieupCompanies.forEach((company) => { %>
+                <article class="industry-logo-tile">
+                  <span><%= company %></span>
+                </article>
+              <% }) %>
+            </div>
+          </div>
+        </section>
+      </article>
+
+      <article class="placement-tab" data-placement-content="placement-achievements">
+        <h2>Placement Achievements</h2>
+        <ul class="placements-list">
+          <% placements.placementAchievements.forEach((item) => { %>
+            <li><%= item %></li>
+          <% }) %>
+        </ul>
+
+        <section class="card">
+          <h3>Batch-wise Placement Count</h3>
+          <table class="student-data-table">
+            <thead>
+              <tr>
+                <th>Batch</th>
+                <th>Total Students</th>
+                <th>Placed Students</th>
+                <th>Placement Rate (%)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% placements.batchWise.forEach((row) => { %>
+                <tr>
+                  <td><strong><%= row.batch %></strong></td>
+                  <td><%= row.totalStudents %></td>
+                  <td><%= row.placedStudents %></td>
+                  <td><%= row.placementRate %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </section>
+      </article>
+
+      <article class="placement-tab" data-placement-content="placement-team">
+        <h2>Placement Team</h2>
+        <div class="placements-team-grid">
+          <% placements.placementTeam.forEach((member) => { %>
+            <article class="placements-team-card">
+              <img src="<%= member.image %>" alt="<%= member.name %>" />
+              <h3><%= member.name %></h3>
+              <p class="placements-team-role"><strong><%= member.role %></strong></p>
+              <div class="placements-team-contact">
+                <span><%= member.email %></span>
+                <span><%= member.phone %></span>
+              </div>
+              <ul>
+                <% member.responsibilities.forEach((item) => { %>
+                  <li><%= item %></li>
+                <% }) %>
+              </ul>
+            </article>
+          <% }) %>
+        </div>
+      </article>
+
+      <article class="placement-tab" data-placement-content="contact">
+        <h2>Contact</h2>
+        <div class="placements-contact-grid">
+          <% placements.contact.officers.forEach((officer) => { %>
+            <article class="placements-contact-card">
+              <img src="<%= officer.image %>" alt="<%= officer.name %>" />
+              <h3><%= officer.name %></h3>
+              <p><%= officer.role %></p>
+              <strong><%= officer.phone %></strong>
+            </article>
+          <% }) %>
+        </div>
+        <div class="placements-contact-box">
+          <p><strong>Office:</strong> <%= placements.contact.office %></p>
+          <p><strong>Email:</strong> <%= placements.contact.email %></p>
+          <p><strong>Phone:</strong> <%= placements.contact.phone %></p>
+          <p><strong>Alternate:</strong> <%= placements.contact.alternate %></p>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <footer class="landing-footer">
+    <div class="footer-grid">
+      <div>
+        <h3><span class="brand-icon">&#127891;</span> <%= home.collegeName %></h3>
+        <p>Empowering students with quality education since 1985. Shaping the leaders of tomorrow.</p>
+      </div>
+      <div>
+        <h4>Quick Links</h4>
+        <a href="/about-college">About Us</a>
+        <a href="/departments">Departments</a>
+        <a href="/faculty">Faculty</a>
+        <a href="/placements">Placements</a>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <p>&#128205; <%= home.contact.address %></p>
+        <p>&#9742; <%= home.contact.phone %></p>
+        <p>&#9993; <%= home.contact.email %></p>
+      </div>
+      <div>
+        <h4>Follow Us</h4>
+        <p>Facebook</p>
+        <p>Twitter</p>
+        <p>Instagram</p>
+        <p>LinkedIn</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; 2026 <%= home.collegeName %>. All rights reserved.
+    </div>
+  </footer>
+</body>
+</html>
+

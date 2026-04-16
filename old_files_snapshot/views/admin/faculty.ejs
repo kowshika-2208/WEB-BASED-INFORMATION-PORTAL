@@ -1,0 +1,49 @@
+<%- include('../partials/layout-top', { title, user, activeSection }) %>
+
+<section class="header-row"><h1>Faculty Management</h1></section>
+
+<section class="grid cards-2">
+  <div class="card">
+    <h3>Add Faculty</h3>
+    <form method="POST" action="/admin/faculty" class="stack-form">
+      <input name="name" placeholder="Name" required />
+      <input name="email" type="email" placeholder="Email" required />
+      <input name="password" type="password" placeholder="Password" required />
+      <input name="department" placeholder="Department" required />
+      <button type="submit">Create Faculty</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h3>Edit Faculty</h3>
+    <form method="POST" action="/admin/faculty/0/edit" class="stack-form" onsubmit="this.action='/admin/faculty/' + this.faculty_id.value + '/edit'">
+      <input name="faculty_id" type="number" placeholder="Faculty ID" required />
+      <input name="department" placeholder="Department" required />
+      <button type="submit">Update Faculty</button>
+    </form>
+  </div>
+</section>
+
+<section class="card">
+  <h3>Faculty</h3>
+  <table>
+    <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Department</th><th>Actions</th></tr></thead>
+    <tbody>
+      <% faculty.forEach(f => { %>
+        <tr>
+          <td><%= f.id %></td>
+          <td><%= f.name %></td>
+          <td><%= f.email %></td>
+          <td><%= f.department %></td>
+          <td>
+            <form method="POST" action="/admin/faculty/<%= f.id %>/delete" class="inline-form">
+              <button type="submit" class="danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</section>
+
+<%- include('../partials/layout-bottom') %>

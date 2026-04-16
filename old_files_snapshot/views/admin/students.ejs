@@ -1,0 +1,63 @@
+<%- include('../partials/layout-top', { title, user, activeSection }) %>
+
+<section class="header-row"><h1>Student Management</h1></section>
+
+<section class="grid cards-2">
+  <div class="card">
+    <h3>Add Student</h3>
+    <form method="POST" action="/admin/students" class="stack-form">
+      <input name="name" placeholder="Name" required />
+      <input name="email" type="email" placeholder="Email" required />
+      <input name="password" type="password" placeholder="Password" required />
+      <input name="department" placeholder="Department" required />
+      <input name="semester" type="number" min="1" max="12" placeholder="Semester" required />
+      <input name="father_name" placeholder="Father Name" />
+      <input name="mother_name" placeholder="Mother Name" />
+      <input name="contact" placeholder="Contact" />
+      <input name="cgpa_overall" type="number" step="0.01" min="0" max="10" placeholder="CGPA" value="0" />
+      <input name="faculty_id" type="number" placeholder="Faculty ID (optional)" />
+      <button type="submit">Create Student</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h3>Edit Student</h3>
+    <form method="POST" action="/admin/students/0/edit" class="stack-form" onsubmit="this.action='/admin/students/' + this.student_id.value + '/edit'">
+      <input name="student_id" type="number" placeholder="Student ID" required />
+      <input name="department" placeholder="Department" required />
+      <input name="semester" type="number" min="1" max="12" placeholder="Semester" required />
+      <input name="faculty_id" type="number" placeholder="Faculty ID (optional)" />
+      <input name="father_name" placeholder="Father Name" />
+      <input name="mother_name" placeholder="Mother Name" />
+      <input name="contact" placeholder="Contact" />
+      <input name="cgpa_overall" type="number" step="0.01" min="0" max="10" placeholder="CGPA" />
+      <button type="submit">Update Student</button>
+    </form>
+  </div>
+</section>
+
+<section class="card">
+  <h3>Students</h3>
+  <table>
+    <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Department</th><th>Semester</th><th>Faculty</th><th>Actions</th></tr></thead>
+    <tbody>
+      <% students.forEach(s => { %>
+        <tr>
+          <td><%= s.id %></td>
+          <td><%= s.name %></td>
+          <td><%= s.email %></td>
+          <td><%= s.department %></td>
+          <td><%= s.semester %></td>
+          <td><%= s.faculty_name || 'N/A' %></td>
+          <td>
+            <form method="POST" action="/admin/students/<%= s.id %>/delete" class="inline-form">
+              <button type="submit" class="danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</section>
+
+<%- include('../partials/layout-bottom') %>

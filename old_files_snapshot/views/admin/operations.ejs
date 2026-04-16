@@ -1,0 +1,34 @@
+<%- include('../partials/layout-top', { title, user, activeSection }) %>
+
+<section class="header-row"><h1>Operations</h1></section>
+
+<section class="grid cards-3">
+  <div class="card">
+    <h3>Assign Faculty to Student</h3>
+    <form method="POST" action="/admin/assign-faculty" class="stack-form">
+      <input name="student_id" type="number" placeholder="Student ID" required />
+      <input name="faculty_id" type="number" placeholder="Faculty ID" required />
+      <button type="submit">Assign</button>
+    </form>
+  </div>
+  <div class="card">
+    <h3>Manage Fees</h3>
+    <form method="POST" action="/admin/fees" class="stack-form">
+      <input name="student_id" type="number" placeholder="Student ID" required />
+      <input name="semester" type="number" min="1" max="12" placeholder="Semester" required />
+      <input name="amount" type="number" min="0" placeholder="Amount" required />
+      <select name="status"><option>Paid</option><option>Pending</option></select>
+      <button type="submit">Save Fee</button>
+    </form>
+  </div>
+  <div class="card">
+    <h3>Manage Semester</h3>
+    <form method="POST" action="/admin/semesters" class="stack-form">
+      <input name="semester_number" type="number" min="1" max="12" placeholder="Semester Number" required />
+      <input name="academic_year" placeholder="Academic Year (2025-2026)" required />
+      <button type="submit">Save Semester</button>
+    </form>
+  </div>
+</section>
+
+<%- include('../partials/layout-bottom') %>

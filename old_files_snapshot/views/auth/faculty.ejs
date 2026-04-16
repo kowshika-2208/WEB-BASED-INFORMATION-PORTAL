@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> | CIP</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <script defer src="/js/theme.js"></script>
+</head>
+<body class="landing-page page-faculty-directory">
+  <header class="landing-nav-wrap">
+    <nav class="landing-nav">
+      <a class="brand-mark" href="/">
+        <span class="brand-icon">&#127891;</span>
+        <span><%= home.collegeName %></span>
+      </a>
+      <div class="landing-links">
+        <a href="/">Home</a>
+        <a href="/about-college">About</a>
+        <a href="/departments">Departments</a>
+        <a class="active" href="/faculty">Faculty</a>
+        <a href="/placements">Placements</a>
+        <a href="/login">Login</a>
+        <a href="/contact">Contact</a>
+        <span class="mode-icon">&#9789;</span>
+      </div>
+    </nav>
+  </header>
+
+  <main class="faculty-screen">
+    <section class="faculty-filter-bar">
+      <h1>Faculty Directory</h1>
+      <select id="deptFilter">
+        <option value="all">--- SELECT DEPARTMENT ---</option>
+        <% facultyDirectory.forEach((dept) => { %>
+          <option value="<%= dept.department %>"><%= dept.department %></option>
+        <% }) %>
+      </select>
+    </section>
+
+    <% facultyDirectory.forEach((dept, deptIndex) => { %>
+      <section class="faculty-dept-block" data-department="<%= dept.department %>">
+        <h2><%= dept.department.toUpperCase() %></h2>
+        <p class="faculty-subtitle">FACULTY MEMBERS</p>
+        <div class="faculty-grid">
+          <% dept.members.forEach((member, memberIndex) => { %>
+            <% const initials = member.name.replace('Dr ', '').split(' ').map((part) => part[0]).slice(0, 2).join(''); %>
+            <% const safePhotoName = member.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); %>
+            <% const profileId = String(((deptIndex * 5 + memberIndex) % 6) + 1).padStart(2, '0'); %>
+            <% const profileFallback = `/images/faculty/profiles/prof-${profileId}.svg`; %>
+            <article class="faculty-card">
+              <div class="faculty-avatar">
+                <img
+                  src="/images/faculty/<%= safePhotoName %>.jpg"
+                  alt="<%= member.name %>"
+                  loading="lazy"
+                  onerror="if(!this.dataset.profFallback){this.dataset.profFallback='1';this.src='<%= profileFallback %>';this.classList.add('is-default');this.nextElementSibling.style.display='none';}else{this.onerror=null;this.src='/images/faculty/default-professional.svg';this.classList.add('is-default');this.nextElementSibling.style.display='none';}" />
+                <span class="faculty-avatar-fallback"><%= initials %></span>
+              </div>
+              <div class="faculty-card-bottom">
+                <h3><%= member.name %></h3>
+                <p><%= member.designation %></p>
+                <span class="faculty-role-tag <%= member.roleType === 'HOD' ? 'hod' : 'staff' %>"><%= member.roleType %></span>
+              </div>
+            </article>
+          <% }) %>
+        </div>
+      </section>
+    <% }) %>
+  </main>
+
+  <footer class="landing-footer">
+    <div class="footer-grid">
+      <div>
+        <h3><span class="brand-icon">&#127891;</span> <%= home.collegeName %></h3>
+        <p>Empowering students with quality education since 1985. Shaping the leaders of tomorrow.</p>
+      </div>
+      <div>
+        <h4>Quick Links</h4>
+        <a href="/about-college">About Us</a>
+        <a href="/departments">Departments</a>
+        <a href="/faculty">Faculty</a>
+        <a href="/placements">Placements</a>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <p>&#128205; <%= home.contact.address %></p>
+        <p>&#9742; <%= home.contact.phone %></p>
+        <p>&#9993; <%= home.contact.email %></p>
+      </div>
+      <div>
+        <h4>Follow Us</h4>
+        <p>Facebook</p>
+        <p>Twitter</p>
+        <p>Instagram</p>
+        <p>LinkedIn</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    (() => {
+      const filter = document.getElementById('deptFilter');
+      const blocks = Array.from(document.querySelectorAll('.faculty-dept-block'));
+      if (!filter) return;
+
+      filter.addEventListener('change', () => {
+        const selected = filter.value;
+        blocks.forEach((block) => {
+          const dept = block.getAttribute('data-department');
+          block.style.display = selected === 'all' || selected === dept ? 'block' : 'none';
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
+
+

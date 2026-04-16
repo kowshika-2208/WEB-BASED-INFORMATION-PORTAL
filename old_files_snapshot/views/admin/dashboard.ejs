@@ -1,0 +1,39 @@
+<%- include('../partials/layout-top', { title, user, activeSection }) %>
+
+<section class="header-row"><h1>Admin Overview</h1></section>
+
+<section class="grid cards-3">
+  <div class="card"><h3>Total Students</h3><p><%= stats.studentCount %></p></div>
+  <div class="card"><h3>Total Departments</h3><p><%= stats.deptCount %></p></div>
+  <div class="card"><h3>Pass Percentage</h3><p><%= stats.passPercentage %>%</p></div>
+</section>
+
+<section class="grid cards-3">
+  <div class="card"><h3>Unread Student Queries</h3><p><%= unreadQueryCount %></p></div>
+  <a class="card nav-card" href="/admin/queries">
+    <h3>Open Query Inbox</h3>
+    <p>View and respond to student-submitted queries.</p>
+  </a>
+  <div class="card">
+    <h3>Recent Query</h3>
+    <% if (queries && queries.length) { %>
+      <p><strong><%= queries[0].subject %></strong></p>
+      <p><%= queries[0].student_name %> - <span class="query-pill <%= String(queries[0].status || '').toLowerCase() %>"><%= queries[0].status %></span></p>
+    <% } else { %>
+      <p>No recent queries.</p>
+    <% } %>
+  </div>
+</section>
+
+<section class="grid cards-2">
+  <div class="card">
+    <h3>Students by Department</h3>
+    <canvas id="adminDeptChart" data-labels='<%- JSON.stringify(stats.departmentBreakdown.map(d => d.department)) %>' data-values='<%- JSON.stringify(stats.departmentBreakdown.map(d => d.total)) %>'></canvas>
+  </div>
+  <div class="card">
+    <h3>Semester Performance</h3>
+    <canvas id="adminPerfChart" data-labels='<%- JSON.stringify(stats.performance.map(d => `Sem ${d.semester}`)) %>' data-values='<%- JSON.stringify(stats.performance.map(d => Number(d.avg_cgpa || 0))) %>'></canvas>
+  </div>
+</section>
+
+<%- include('../partials/layout-bottom') %>

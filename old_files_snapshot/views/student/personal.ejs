@@ -1,0 +1,80 @@
+<%- include('../partials/layout-top', { title, user, activeSection }) %>
+
+<%
+  const marks = data.marks || [];
+  const totals = marks.map(m => Number(m.internal_marks || 0) + Number(m.external_marks || 0));
+  const totalSubjects = marks.length;
+  const averageScore = totalSubjects ? (totals.reduce((sum, score) => sum + score, 0) / totalSubjects).toFixed(2) : '0.00';
+  const highestScore = totalSubjects ? Math.max(...totals) : 0;
+
+  const getGrade = (score) => {
+    if (score >= 115) return 'A+';
+    if (score >= 105) return 'A';
+    if (score >= 95) return 'B+';
+    if (score >= 85) return 'B';
+    if (score >= 75) return 'C';
+    return 'D';
+  };
+
+  const getGradeClass = (grade) => {
+    if (grade === 'A+' || grade === 'A') return 'excellent';
+    if (grade === 'B+' || grade === 'B') return 'good';
+    return 'average';
+  };
+%>
+
+<section class="header-row"><h1>Marks Details</h1></section>
+
+<section class="grid cards-3">
+  <div class="card">
+    <h3>Total Subjects</h3>
+    <p><%= totalSubjects %></p>
+  </div>
+  <div class="card">
+    <h3>Average Score</h3>
+    <p><%= averageScore %></p>
+  </div>
+  <div class="card">
+    <h3>Highest Score</h3>
+    <p><%= highestScore %></p>
+  </div>
+</section>
+
+<section class="card marks-card">
+  <h3>Semester-wise Subject Marks</h3>
+  <table class="marks-table">
+    <thead>
+      <tr>
+        <th>Semester</th>
+        <th>Subject</th>
+        <th>Internal</th>
+        <th>External</th>
+        <th>Total</th>
+        <th>Grade</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% marks.forEach(row => { %>
+        <%
+          const score = Number(row.internal_marks || 0) + Number(row.external_marks || 0);
+          const grade = getGrade(score);
+        %>
+        <tr>
+          <td>Sem <%= row.semester %></td>
+          <td><strong><%= row.subject %></strong></td>
+          <td><%= row.internal_marks %></td>
+          <td><%= row.external_marks %></td>
+          <td><%= score %></td>
+          <td><span class="grade-pill <%= getGradeClass(grade) %>"><%= grade %></span></td>
+        </tr>
+      <% }) %>
+      <% if (!marks.length) { %>
+        <tr>
+          <td colspan="6">No marks available yet.</td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+</section>
+
+<%- include('../partials/layout-bottom') %>

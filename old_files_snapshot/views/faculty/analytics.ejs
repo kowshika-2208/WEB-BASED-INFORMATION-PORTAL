@@ -1,0 +1,20 @@
+<%- include('../partials/layout-top', { title, user, activeSection }) %>
+
+<section class="header-row"><h1>Student Performance Analytics</h1></section>
+
+<section class="card">
+  <canvas id="facultyAnalyticsChart" data-labels='<%- JSON.stringify(data.analytics.map(d => `Sem ${d.semester}`)) %>' data-values='<%- JSON.stringify(data.analytics.map(d => Number(d.avg_cgpa || 0))) %>'></canvas>
+</section>
+
+<section class="card">
+  <table>
+    <thead><tr><th>Semester</th><th>Avg CGPA</th><th>Avg Attendance</th></tr></thead>
+    <tbody>
+      <% data.analytics.forEach(a => { %>
+        <tr><td><%= a.semester %></td><td><%= Number(a.avg_cgpa || 0).toFixed(2) %></td><td><%= Number(a.avg_attendance || 0).toFixed(2) %></td></tr>
+      <% }) %>
+    </tbody>
+  </table>
+</section>
+
+<%- include('../partials/layout-bottom') %>

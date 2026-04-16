@@ -1,0 +1,23 @@
+<%- include('../partials/layout-top', { title, user, activeSection }) %>
+
+<section class="header-row"><h1>Reports</h1></section>
+
+<section class="grid cards-3">
+  <div class="card"><h3>Total Students</h3><p><%= stats.studentCount %></p></div>
+  <div class="card"><h3>Total Departments</h3><p><%= stats.deptCount %></p></div>
+  <div class="card"><h3>Pass Percentage</h3><p><%= stats.passPercentage %>%</p></div>
+</section>
+
+<section class="card">
+  <h3>Student Performance Overview</h3>
+  <table>
+    <thead><tr><th>Name</th><th>Department</th><th>Semester</th><th>CGPA</th><th>Faculty</th></tr></thead>
+    <tbody>
+      <% students.forEach(s => { %>
+        <tr><td><%= s.name %></td><td><%= s.department %></td><td><%= s.semester %></td><td><%= s.cgpa_overall %></td><td><%= s.faculty_name || 'N/A' %></td></tr>
+      <% }) %>
+    </tbody>
+  </table>
+</section>
+
+<%- include('../partials/layout-bottom') %>

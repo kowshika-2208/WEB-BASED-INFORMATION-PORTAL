@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> | CIP</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <script defer src="/js/theme.js"></script>
+</head>
+<body class="landing-page page-login">
+  <header class="landing-nav-wrap">
+    <nav class="landing-nav">
+      <a class="brand-mark" href="/">
+        <span class="brand-icon">&#127891;</span>
+        <span><%= home.collegeName %></span>
+      </a>
+      <div class="landing-links">
+        <a href="/">Home</a>
+        <a href="/about-college">About</a>
+        <a href="/departments">Departments</a>
+        <a href="/faculty">Faculty</a>
+        <a href="/placements">Placements</a>
+        <a class="active" href="/login">Login</a>
+        <a href="/contact">Contact</a>
+        <span class="mode-icon">&#9789;</span>
+      </div>
+    </nav>
+  </header>
+
+  <main class="login-screen">
+    <h1 class="login-title">Login</h1>
+    <section class="login-card-modern">
+      <h2>Select your role</h2>
+
+      <div class="role-switch" id="roleSwitch">
+        <button type="button" class="role-btn active" data-role="student" data-email="student@cip.edu" data-password="Student@123">Student</button>
+        <button type="button" class="role-btn" data-role="faculty" data-email="faculty@cip.edu" data-password="Faculty@123">Staff</button>
+        <button type="button" class="role-btn" data-role="admin" data-email="admin@cip.edu" data-password="Admin@123">Admin</button>
+      </div>
+
+      <div class="login-avatar">&#128100;</div>
+
+      <form method="POST" action="/login" class="modern-form" id="loginForm">
+        <% if (error) { %><p class="error-text"><%= error %></p><% } %>
+
+        <label for="emailInput">Email</label>
+        <input id="emailInput" type="email" name="email" placeholder="student@college.edu" required />
+
+        <label for="passwordInput">Password</label>
+        <input id="passwordInput" type="password" name="password" placeholder="Enter your password" required />
+
+        <button id="submitBtn" type="submit">Login as Student</button>
+      </form>
+
+      <div class="demo-creds login-demo">
+        <h3>Demo Login Credentials</h3>
+        <div class="demo-login-row">
+          <p><strong>Admin:</strong> admin@cip.edu / Admin@123</p>
+          <div class="demo-login-actions">
+            <button type="button" class="use-demo-btn" data-role="admin" data-email="admin@cip.edu" data-password="Admin@123">Use</button>
+            <button type="button" class="quick-login-btn" data-role="admin" data-email="admin@cip.edu" data-password="Admin@123">Use & Login</button>
+          </div>
+        </div>
+        <div class="demo-login-row">
+          <p><strong>Faculty:</strong> faculty@cip.edu / Faculty@123</p>
+          <div class="demo-login-actions">
+            <button type="button" class="use-demo-btn" data-role="faculty" data-email="faculty@cip.edu" data-password="Faculty@123">Use</button>
+            <button type="button" class="quick-login-btn" data-role="faculty" data-email="faculty@cip.edu" data-password="Faculty@123">Use & Login</button>
+          </div>
+        </div>
+        <div class="demo-login-row">
+          <p><strong>Student:</strong> student@cip.edu / Student@123</p>
+          <div class="demo-login-actions">
+            <button type="button" class="use-demo-btn" data-role="student" data-email="student@cip.edu" data-password="Student@123">Use</button>
+            <button type="button" class="quick-login-btn" data-role="student" data-email="student@cip.edu" data-password="Student@123">Use & Login</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo-creds login-demo">
+        <h3>Dashboard Includes</h3>
+        <p><strong>Admin:</strong> Students, Faculty, Operations, Reports, Queries</p>
+        <p><strong>Staff:</strong> Assigned Students, Marks, Attendance, Leaves, Analytics</p>
+        <p><strong>Student:</strong> Profile, Attendance, Marks, Timetable</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="landing-footer">
+    <div class="footer-grid">
+      <div>
+        <h3><span class="brand-icon">&#127891;</span> <%= home.collegeName %></h3>
+        <p>Empowering students with quality education since 1985. Shaping the leaders of tomorrow.</p>
+      </div>
+      <div>
+        <h4>Quick Links</h4>
+        <a href="/about-college">About Us</a>
+        <a href="/departments">Departments</a>
+        <a href="/faculty">Faculty</a>
+        <a href="/placements">Placements</a>
+        <a href="/contact">Contact</a>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <p>&#128205; <%= home.contact.address %></p>
+        <p>&#9742; <%= home.contact.phone %></p>
+        <p>&#9993; <%= home.contact.email %></p>
+      </div>
+      <div>
+        <h4>Follow Us</h4>
+        <p>Facebook</p>
+        <p>Twitter</p>
+        <p>Instagram</p>
+        <p>LinkedIn</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; 2026 <%= home.collegeName %>. All rights reserved.
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      const roleButtons = document.querySelectorAll('.role-btn');
+      const useDemoButtons = document.querySelectorAll('.use-demo-btn');
+      const quickLoginButtons = document.querySelectorAll('.quick-login-btn');
+      const emailInput = document.getElementById('emailInput');
+      const passwordInput = document.getElementById('passwordInput');
+      const submitBtn = document.getElementById('submitBtn');
+      const loginForm = document.getElementById('loginForm');
+
+      const toLabel = (role) => {
+        if (role === 'faculty') return 'Staff';
+        return role.charAt(0).toUpperCase() + role.slice(1);
+      };
+
+      const applyDemo = (email, password, role) => {
+        const matchingRoleBtn = Array.from(roleButtons).find((btn) => btn.dataset.role === role);
+        if (matchingRoleBtn) {
+          roleButtons.forEach((b) => b.classList.remove('active'));
+          matchingRoleBtn.classList.add('active');
+          submitBtn.textContent = 'Login as ' + toLabel(role);
+        }
+        emailInput.value = email;
+        passwordInput.value = password;
+      };
+
+      roleButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          roleButtons.forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+          emailInput.value = btn.dataset.email;
+          passwordInput.value = btn.dataset.password;
+          submitBtn.textContent = 'Login as ' + toLabel(btn.dataset.role);
+        });
+      });
+
+      useDemoButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          applyDemo(btn.dataset.email, btn.dataset.password, btn.dataset.role);
+        });
+      });
+
+      quickLoginButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          applyDemo(btn.dataset.email, btn.dataset.password, btn.dataset.role);
+          if (typeof loginForm.requestSubmit === 'function') {
+            loginForm.requestSubmit();
+          } else {
+            loginForm.submit();
+          }
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
+
+
+
+

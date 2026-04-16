@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 260" role="img" aria-label="Professional faculty portrait">
+  <rect width="260" height="260" rx="26" fill="#f3f7ff"/>
+  <rect x="0" y="170" width="260" height="90" fill="#3b2b5f"/>
+  <circle cx="130" cy="96" r="44" fill="#e8b991"/>
+  <path d="M88 88c0-27 18-46 42-46s42 19 42 46v14H88z" fill="#2b2b2b"/>
+  <rect x="104" y="72" width="52" height="12" rx="6" fill="#2b2b2b"/>
+  <path d="M80 204c12-28 30-45 50-45s38 17 50 45" fill="#2b2b2b"/>
+  <path d="M106 159l24 16 24-16v44h-48z" fill="#ffffff"/>
+  <path d="M130 176l9 12-9 24-9-24z" fill="#ef4444"/>
+</svg>

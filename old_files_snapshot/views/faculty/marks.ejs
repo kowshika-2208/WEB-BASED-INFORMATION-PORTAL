@@ -1,0 +1,149 @@
+<%- include('../partials/layout-top', { title, user, activeSection }) %>
+
+<%
+  const marksEntries = data.marksEntries || [];
+  const getGrade = (total) => {
+    if (total >= 90) return 'A+';
+    if (total >= 80) return 'A';
+    if (total >= 70) return 'B+';
+    if (total >= 60) return 'B';
+    if (total >= 50) return 'C';
+    return 'D';
+  };
+%>
+
+<section class="header-row"><h1>Marks Entry</h1></section>
+
+<section class="grid cards-2">
+  <div class="card">
+    <h3>Quick Internal Mark Entry</h3>
+    <p>Select student name, see full details, then enter internal mark only.</p>
+    <form method="POST" action="/faculty/marks" class="stack-form" id="quickMarkForm">
+      <select name="student_id" id="markStudentSelect" required>
+        <option value="">Select Student</option>
+        <% data.students.forEach(s => { %>
+          <option
+            value="<%= s.student_id %>"
+            data-name="<%= s.name %>"
+            data-email="<%= s.email %>"
+            data-department="<%= s.department %>"
+            data-semester="<%= s.semester %>"
+            data-cgpa="<%= s.cgpa_overall %>"><%= s.name %> (ID <%= s.student_id %>)</option>
+        <% }) %>
+      </select>
+      <div class="demo-creds" id="selectedStudentInfo">
+        <h3>Overall Student Details</h3>
+        <p>Select a student to view details.</p>
+      </div>
+      <input name="subject" list="subjectList" placeholder="Subject (e.g., Mathematics)" required />
+      <datalist id="subjectList">
+        <% const subjectSet = new Set(marksEntries.map((m) => m.subject)); %>
+        <% subjectSet.forEach((subject) => { %>
+          <option value="<%= subject %>"></option>
+        <% }) %>
+      </datalist>
+      <input name="internal_marks" type="number" min="0" max="40" placeholder="Internal (40)" required />
+      <input type="hidden" name="external_marks" value="" />
+      <input name="semester" type="number" min="1" max="12" placeholder="Semester" required />
+      <button type="submit">Save Marks</button>
+    </form>
+  </div>
+  <div class="card">
+    <h3>Reference Student List</h3>
+    <table>
+      <thead><tr><th>ID</th><th>Name</th><th>Department</th><th>Sem</th><th>CGPA</th></tr></thead>
+      <tbody>
+        <% data.students.forEach(s => { %>
+          <tr>
+            <td><%= s.student_id %></td>
+            <td><%= s.name %></td>
+            <td><%= s.department %></td>
+            <td><%= s.semester %></td>
+            <td><%= s.cgpa_overall %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="card">
+  <h3>Existing Marks and Quick Update</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Student</th>
+        <th>Sem</th>
+        <th>Subject</th>
+        <th>Internal</th>
+        <th>External</th>
+        <th>Total</th>
+        <th>Grade</th>
+        <th>Update Internal</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% marksEntries.forEach(row => { %>
+        <% const total = Number(row.internal_marks || 0) + Number(row.external_marks || 0); %>
+        <tr>
+          <td><strong><%= row.student_name %></strong><br /><small>ID: <%= row.student_id %></small></td>
+          <td><%= row.semester %></td>
+          <td><%= row.subject %></td>
+          <td><%= row.internal_marks %></td>
+          <td><%= row.external_marks %></td>
+          <td><%= total %></td>
+          <td><%= getGrade(total) %></td>
+          <td>
+            <form method="POST" action="/faculty/marks" class="stack-form">
+              <input type="hidden" name="student_id" value="<%= row.student_id %>" />
+              <input type="hidden" name="subject" value="<%= row.subject %>" />
+              <input type="hidden" name="semester" value="<%= row.semester %>" />
+              <input type="hidden" name="external_marks" value="<%= row.external_marks %>" />
+              <input name="internal_marks" type="number" min="0" max="40" value="<%= row.internal_marks %>" required />
+              <button type="submit">Update</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+      <% if (!marksEntries.length) { %>
+        <tr><td colspan="8">No marks entries found. Add the first entry above.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</section>
+
+<script>
+  (() => {
+    const select = document.getElementById('markStudentSelect');
+    const info = document.getElementById('selectedStudentInfo');
+    const form = document.getElementById('quickMarkForm');
+    if (!select || !info || !form) return;
+
+    const semesterInput = form.querySelector('input[name="semester"]');
+
+    const updateInfo = () => {
+      const option = select.options[select.selectedIndex];
+      if (!option || !option.value) {
+        info.innerHTML = '<h3>Overall Student Details</h3><p>Select a student to view details.</p>';
+        return;
+      }
+
+      if (semesterInput) semesterInput.value = option.dataset.semester || '';
+
+      info.innerHTML = `
+        <h3>Overall Student Details</h3>
+        <p><strong>Name:</strong> ${option.dataset.name || '-'}</p>
+        <p><strong>ID:</strong> ${option.value}</p>
+        <p><strong>Email:</strong> ${option.dataset.email || '-'}</p>
+        <p><strong>Department:</strong> ${option.dataset.department || '-'}</p>
+        <p><strong>Semester:</strong> ${option.dataset.semester || '-'}</p>
+        <p><strong>CGPA:</strong> ${option.dataset.cgpa || '-'}</p>
+      `;
+    };
+
+    select.addEventListener('change', updateInfo);
+    updateInfo();
+  })();
+</script>
+
+<%- include('../partials/layout-bottom') %>

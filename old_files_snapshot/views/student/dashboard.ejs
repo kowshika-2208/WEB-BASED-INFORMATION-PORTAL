@@ -1,0 +1,524 @@
+<%- include('../partials/layout-top', { title, user, activeSection: 'profile' }) %>
+
+<%
+  const profile = data.profile || {};
+  const marks = data.marks || [];
+  const currentSemesterMarks = marks.filter((m) => Number(m.semester) === Number(profile.semester));
+  const markRows = currentSemesterMarks.length ? currentSemesterMarks : marks;
+  const rollNo = `21CSE${String(profile.student_id || 0).padStart(3, '0')}`;
+  const year = Math.max(1, Math.ceil(Number(profile.semester || 1) / 2));
+  const semesterLabel = `${year}${year === 1 ? 'st' : year === 2 ? 'nd' : year === 3 ? 'rd' : 'th'} Year / ${profile.semester || 1}${Number(profile.semester || 1) === 1 ? 'st' : Number(profile.semester || 1) === 2 ? 'nd' : Number(profile.semester || 1) === 3 ? 'rd' : 'th'} Semester`;
+
+  const uniqueBySubject = new Map();
+  markRows.forEach((row) => {
+    const total = Number(row.internal_marks || 0) + Number(row.external_marks || 0);
+    const pct = Math.min(100, Math.round((total / 120) * 100));
+    uniqueBySubject.set(row.subject, pct);
+  });
+  const attendanceCards = Array.from(uniqueBySubject.entries());
+  const semesterCgpaRows = (data.semesterCgpa || []).slice().sort((a, b) => Number(a.semester) - Number(b.semester));
+  const semesterCgpaMap = new Map(semesterCgpaRows.map((r) => [Number(r.semester), Number(r.cgpa)]));
+  const currentSemesterNumber = Number(profile.semester || 1);
+  const knownCgpas = semesterCgpaRows.map((r) => Number(r.cgpa || 0)).filter((v) => Number.isFinite(v) && v > 0);
+  let lastCgpa = knownCgpas.length ? knownCgpas[0] : Number(profile.cgpa_overall || 0);
+  const fullSemesterCgpaRows = Array.from({ length: currentSemesterNumber }, (_, idx) => {
+    const semester = idx + 1;
+    if (semesterCgpaMap.has(semester)) {
+      lastCgpa = Number(semesterCgpaMap.get(semester) || 0);
+    }
+    return { semester, cgpa: +lastCgpa.toFixed(2) };
+  });
+  const currentSemesterCgpa = fullSemesterCgpaRows.length
+    ? fullSemesterCgpaRows[fullSemesterCgpaRows.length - 1].cgpa
+    : Number(profile.cgpa_overall || 0);
+  const highestSemesterCgpa = fullSemesterCgpaRows.length
+    ? Math.max(...fullSemesterCgpaRows.map((r) => Number(r.cgpa || 0)))
+    : Number(profile.cgpa_overall || 0);
+  const passMark = 48;
+  const enrichedMarks = marks.map((row) => {
+    const total = Number(row.internal_marks || 0) + Number(row.external_marks || 0);
+    const isPassed = total >= passMark;
+    return { ...row, total, isPassed };
+  });
+  const currentSemesterArrears = enrichedMarks.filter(
+    (row) => Number(row.semester) === currentSemesterNumber && !row.isPassed
+  );
+  const overallArrears = enrichedMarks.filter((row) => !row.isPassed);
+  const carryOverArrears = enrichedMarks.filter(
+    (row) => Number(row.semester) < currentSemesterNumber && !row.isPassed
+  );
+  const semesterArrearHistory = Array.from({ length: currentSemesterNumber }, (_, idx) => {
+    const semester = idx + 1;
+    const rows = enrichedMarks.filter((row) => Number(row.semester) === semester);
+    const arrears = rows.filter((row) => !row.isPassed);
+    return {
+      semester,
+      attempted: rows.length,
+      cleared: rows.filter((row) => row.isPassed).length,
+      arrears: arrears.length,
+      status: arrears.length ? 'Has Arrears' : 'Clear'
+    };
+  });
+  const attemptedSubjects = enrichedMarks.length;
+  const passedSubjects = enrichedMarks.filter((row) => row.isPassed).length;
+  const failedSubjects = attemptedSubjects - passedSubjects;
+  const passPercentage = attemptedSubjects ? ((passedSubjects * 100) / attemptedSubjects).toFixed(2) : '0.00';
+  const bestSubject = enrichedMarks.length
+    ? enrichedMarks.reduce((best, row) => (row.total > best.total ? row : best), enrichedMarks[0])
+    : null;
+  const weakSubject = enrichedMarks.length
+    ? enrichedMarks.reduce((low, row) => (row.total < low.total ? row : low), enrichedMarks[0])
+    : null;
+
+  const getGrade = (total) => {
+    if (total >= 115) return 'A+';
+    if (total >= 105) return 'A';
+    if (total >= 95) return 'B+';
+    if (total >= 85) return 'B';
+    return 'C';
+  };
+%>
+
+<section class="student-dashboard-panels">
+  <article id="profile" class="student-panel active">
+    <div class="student-card student-profile-card">
+      <div class="student-avatar"><%= String(profile.name || 'S').trim().slice(0, 2).toUpperCase() %></div>
+      <div class="student-info-grid">
+        <div class="info-row"><span>Name:</span><strong><%= profile.name || 'N/A' %></strong></div>
+        <div class="info-row"><span>Roll No:</span><strong><%= rollNo %></strong></div>
+        <div class="info-row"><span>Department:</span><strong><%= profile.department || 'N/A' %></strong></div>
+        <div class="info-row"><span>Year / Semester:</span><strong><%= semesterLabel %></strong></div>
+        <div class="info-row"><span>Email:</span><strong><%= profile.email || 'N/A' %></strong></div>
+        <div class="info-row"><span>Phone:</span><strong><%= profile.contact || 'N/A' %></strong></div>
+        <div class="info-row"><span>Father Name:</span><strong><%= profile.father_name || 'N/A' %></strong></div>
+        <div class="info-row"><span>Mother Name:</span><strong><%= profile.mother_name || 'N/A' %></strong></div>
+      </div>
+    </div>
+  </article>
+
+  <article id="attendance" class="student-panel">
+    <div class="attendance-grid">
+      <% if (!attendanceCards.length) { %>
+        <div class="student-card"><p>No attendance breakdown found.</p></div>
+      <% } %>
+      <% attendanceCards.forEach(([subject, pct]) => { %>
+        <div class="student-card attendance-card">
+          <div class="attendance-head">
+            <h3><%= subject %></h3>
+            <span><%= pct %>%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" style="width: <%= pct %>%;"></div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  </article>
+
+  <article id="marks" class="student-panel">
+    <div class="student-card table-card">
+      <table class="student-data-table">
+        <thead>
+          <tr>
+            <th>Subject</th>
+            <th>Internal</th>
+            <th>External</th>
+            <th>Total</th>
+            <th>Grade</th>
+            <th>Result</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% markRows.forEach((row) => { %>
+            <% const total = Number(row.internal_marks || 0) + Number(row.external_marks || 0); %>
+            <% const result = total >= 48 ? 'Pass' : 'Fail'; %>
+            <tr>
+              <td><strong><%= row.subject %></strong></td>
+              <td><%= row.internal_marks %></td>
+              <td><%= row.external_marks %></td>
+              <td><%= total %></td>
+              <td><strong><%= getGrade(total) %></strong></td>
+              <td><strong><%= result %></strong></td>
+            </tr>
+          <% }) %>
+          <% if (!markRows.length) { %>
+            <tr><td colspan="6">No marks found.</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </article>
+
+  <article id="result" class="student-panel">
+    <section class="grid cards-4">
+      <div class="card">
+        <h3>Overall CGPA</h3>
+        <p><%= Number(profile.cgpa_overall || 0).toFixed(2) %></p>
+      </div>
+      <div class="card">
+        <h3>Current Semester CGPA</h3>
+        <p><%= Number(currentSemesterCgpa || 0).toFixed(2) %></p>
+      </div>
+      <div class="card">
+        <h3>Highest Semester CGPA</h3>
+        <p><%= Number(highestSemesterCgpa || 0).toFixed(2) %></p>
+      </div>
+      <div class="card">
+        <h3>Pass Percentage</h3>
+        <p><%= passPercentage %>%</p>
+      </div>
+    </section>
+
+    <section class="grid cards-4">
+      <div class="card">
+        <h3>Total Arrears</h3>
+        <p><%= overallArrears.length %></p>
+      </div>
+      <div class="card">
+        <h3>Current Semester Arrears</h3>
+        <p><%= currentSemesterArrears.length %></p>
+      </div>
+      <div class="card">
+        <h3>Carry Over Arrears</h3>
+        <p><%= carryOverArrears.length %></p>
+      </div>
+      <div class="card">
+        <h3>Subjects Cleared</h3>
+        <p><%= passedSubjects %> / <%= attemptedSubjects %></p>
+      </div>
+    </section>
+
+    <section class="grid cards-2">
+      <div class="card">
+        <h3>Best Subject</h3>
+        <% if (bestSubject) { %>
+          <p><strong><%= bestSubject.subject %></strong> (Sem <%= bestSubject.semester %>)</p>
+          <p>Total: <%= bestSubject.total %> / 120</p>
+        <% } else { %>
+          <p>No marks available.</p>
+        <% } %>
+      </div>
+      <div class="card">
+        <h3>Needs Improvement</h3>
+        <% if (weakSubject) { %>
+          <p><strong><%= weakSubject.subject %></strong> (Sem <%= weakSubject.semester %>)</p>
+          <p>Total: <%= weakSubject.total %> / 120</p>
+        <% } else { %>
+          <p>No marks available.</p>
+        <% } %>
+      </div>
+    </section>
+
+    <div class="student-card result-chart-card">
+      <h3>Semester CGPA Trend</h3>
+      <canvas
+        class="student-result-chart"
+        id="studentResultChart"
+        data-labels='<%- JSON.stringify(fullSemesterCgpaRows.map((d) => `Sem ${d.semester}`)) %>'
+        data-values='<%- JSON.stringify(fullSemesterCgpaRows.map((d) => Number(d.cgpa || 0))) %>'></canvas>
+    </div>
+
+    <div class="student-card table-card">
+      <table class="student-data-table">
+        <thead>
+          <tr>
+            <th>Current Arrear Subject</th>
+            <th>Semester</th>
+            <th>Total</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% currentSemesterArrears.forEach((row) => { %>
+            <tr>
+              <td><strong><%= row.subject %></strong></td>
+              <td>Sem <%= row.semester %></td>
+              <td><%= row.total %> / 120</td>
+              <td><strong>Arrear</strong></td>
+            </tr>
+          <% }) %>
+          <% if (!currentSemesterArrears.length) { %>
+            <tr><td colspan="4">No current semester arrears.</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="student-card table-card">
+      <table class="student-data-table">
+        <thead>
+          <tr>
+            <th>Semester</th>
+            <th>Subjects Attempted</th>
+            <th>Cleared</th>
+            <th>Arrears</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% semesterArrearHistory.forEach((row) => { %>
+            <tr>
+              <td>Sem <%= row.semester %></td>
+              <td><%= row.attempted %></td>
+              <td><%= row.cleared %></td>
+              <td><%= row.arrears %></td>
+              <td><strong><%= row.status %></strong></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="student-card table-card">
+      <table class="student-data-table">
+        <thead>
+          <tr>
+            <th>Semester</th>
+            <th>CGPA</th>
+            <th>Result</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% fullSemesterCgpaRows.forEach((row) => { %>
+            <% const history = semesterArrearHistory.find((h) => Number(h.semester) === Number(row.semester)); %>
+            <tr>
+              <td>Sem <%= row.semester %></td>
+              <td><strong><%= Number(row.cgpa || 0).toFixed(2) %></strong></td>
+              <td><strong><%= history && history.arrears > 0 ? 'Arrear' : 'Pass' %></strong></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </article>
+
+  <article id="leave" class="student-panel">
+    <section class="grid cards-2">
+      <div class="card">
+        <h3>Apply Leave</h3>
+        <p>Submitted leave requests are sent to your faculty advisor for approval.</p>
+        <form method="POST" action="/student/leave" class="stack-form">
+          <textarea name="reason" rows="3" placeholder="Leave reason" required></textarea>
+          <input type="date" name="from_date" required />
+          <input type="date" name="to_date" required />
+          <button type="submit">Submit Leave Request</button>
+        </form>
+      </div>
+      <div class="card">
+        <h3>Faculty Notification</h3>
+        <p><strong>Faculty In-Charge:</strong> <%= profile.faculty_name || 'Not Assigned' %></p>
+        <p><strong>Pending Requests:</strong> <%= (data.leaves || []).filter((l) => String(l.status) === 'Pending').length %></p>
+        <p>Once submitted, status stays <strong>Pending</strong> until faculty approves or rejects.</p>
+      </div>
+    </section>
+
+    <div class="student-card table-card">
+      <table class="student-data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Reason</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Status</th>
+            <th>Faculty Decision</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% (data.leaves || []).forEach((leave) => { %>
+            <% const leaveStatus = String(leave.status || 'Pending'); %>
+            <% const decisionMessage = leaveStatus === 'Approved'
+              ? 'Leave Approved by Faculty'
+              : leaveStatus === 'Rejected'
+                ? 'Leave Cancelled by Faculty'
+                : 'Pending Faculty Action'; %>
+            <tr>
+              <td><%= leave.id %></td>
+              <td><%= leave.reason %></td>
+              <td><%= new Date(leave.from_date).toLocaleDateString() %></td>
+              <td><%= new Date(leave.to_date).toLocaleDateString() %></td>
+              <td><strong><%= leaveStatus === 'Rejected' ? 'Cancelled' : leaveStatus %></strong></td>
+              <td><strong><%= decisionMessage %></strong></td>
+            </tr>
+          <% }) %>
+          <% if (!data.leaves || data.leaves.length === 0) { %>
+            <tr><td colspan="6">No leave records found.</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </article>
+
+  <article id="fees" class="student-panel">
+    <%
+      const feeRows = (data.fees || []).slice().sort((a, b) => Number(a.semester) - Number(b.semester));
+      const totalFeeAmount = feeRows.reduce((sum, row) => sum + Number(row.amount || 0), 0);
+      const paidFeeAmount = feeRows
+        .filter((row) => String(row.status).toLowerCase() === 'paid')
+        .reduce((sum, row) => sum + Number(row.amount || 0), 0);
+      const pendingFeeAmount = Math.max(0, totalFeeAmount - paidFeeAmount);
+      const pendingFeeRows = feeRows.filter((row) => String(row.status).toLowerCase() !== 'paid');
+      const hasPendingFees = pendingFeeRows.length > 0;
+      const yearBase = new Date().getFullYear();
+      const dueDateForSemester = (semester) => new Date(yearBase, Math.min(11, Math.max(0, Number(semester) - 1)), 25);
+      const latestSemester = feeRows.length ? Number(feeRows[feeRows.length - 1].semester) : 1;
+      const lastPendingSemester = pendingFeeRows.length
+        ? Math.max(...pendingFeeRows.map((row) => Number(row.semester || 0)))
+        : latestSemester;
+      const lastDueDate = dueDateForSemester(lastPendingSemester);
+    %>
+    <section class="grid cards-4">
+      <div class="card">
+        <h3>Fee Status</h3>
+        <p><%= hasPendingFees ? 'Pending' : 'Cleared' %></p>
+      </div>
+      <div class="card">
+        <h3>Total Fee</h3>
+        <p><%= totalFeeAmount.toFixed(2) %></p>
+      </div>
+      <div class="card">
+        <h3>Pending Fee</h3>
+        <p><%= pendingFeeAmount.toFixed(2) %></p>
+      </div>
+      <div class="card">
+        <h3>Last Date For Fee Due</h3>
+        <p><%= lastDueDate.toLocaleDateString() %></p>
+      </div>
+    </section>
+
+    <div class="student-card table-card">
+      <table class="student-data-table">
+        <thead>
+          <tr>
+            <th>Semester</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Pending Amount</th>
+            <th>Due Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% feeRows.forEach((fee) => { %>
+            <% const pendingAmount = String(fee.status).toLowerCase() === 'paid' ? 0 : Number(fee.amount || 0); %>
+            <tr>
+              <td>Sem <%= fee.semester %></td>
+              <td><%= Number(fee.amount || 0).toFixed(2) %></td>
+              <td><strong><%= fee.status %></strong></td>
+              <td><%= pendingAmount.toFixed(2) %></td>
+              <td><%= dueDateForSemester(fee.semester).toLocaleDateString() %></td>
+            </tr>
+          <% }) %>
+          <% if (!feeRows.length) { %>
+            <tr><td colspan="5">No fee records found.</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </article>
+
+  <article id="hall-ticket" class="student-panel">
+    <section class="grid cards-2">
+      <div class="card">
+        <h3>Hall Ticket Status</h3>
+        <p><strong>Availability:</strong> <%= profile.hall_ticket_available ? 'Available' : 'Pending' %></p>
+        <p><strong>Student:</strong> <%= profile.name || 'N/A' %></p>
+        <p><strong>Department:</strong> <%= profile.department || 'N/A' %></p>
+        <p><strong>Semester:</strong> <%= profile.semester || 'N/A' %></p>
+      </div>
+      <div class="card">
+        <h3>Actions</h3>
+        <% if (profile.hall_ticket_available) { %>
+          <p>Your hall ticket is ready. You can view or download it.</p>
+          <a class="btn" href="/student/hall-ticket">View Hall Ticket</a>
+          <a class="btn" style="margin-left:8px;" href="/student/hall-ticket/download">Download PDF</a>
+        <% } else { %>
+          <p>Hall ticket is not released yet. Please check again later.</p>
+          <a class="btn" href="/student/hall-ticket">Check Status</a>
+        <% } %>
+      </div>
+    </section>
+  </article>
+
+  <article id="timetable" class="student-panel">
+    <div class="student-card table-card">
+      <h2>Weekly Timetable</h2>
+      <table class="student-data-table">
+        <thead>
+          <tr>
+            <th>Day</th>
+            <th>9:00</th>
+            <th>10:00</th>
+            <th>11:00</th>
+            <th>12:00</th>
+            <th>2:00</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Monday</strong></td><td>Math</td><td>DSA</td><td>-</td><td>Physics</td><td>English</td></tr>
+          <tr><td><strong>Tuesday</strong></td><td>DSA Lab</td><td>DSA Lab</td><td>-</td><td>Math</td><td>Digital</td></tr>
+          <tr><td><strong>Wednesday</strong></td><td>English</td><td>Physics</td><td>-</td><td>Digital Lab</td><td>Digital Lab</td></tr>
+          <tr><td><strong>Thursday</strong></td><td>Math</td><td>English</td><td>-</td><td>DSA</td><td>Physics</td></tr>
+          <tr><td><strong>Friday</strong></td><td>Physics Lab</td><td>Physics Lab</td><td>-</td><td>Math</td><td>DSA</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </article>
+</section>
+
+<footer class="student-footer">
+  <section class="footer-grid">
+    <div>
+      <h3><span class="brand-icon">&#127891;</span> BIT</h3>
+      <p>Empowering students with quality education since 1985. Shaping the leaders of tomorrow.</p>
+    </div>
+    <div>
+      <h4>Quick Links</h4>
+      <a href="/about-college">About Us</a>
+      <a href="/departments">Departments</a>
+      <a href="/faculty">Faculty</a>
+      <a href="/placements">Placements</a>
+      <a href="/contact">Contact</a>
+    </div>
+    <div>
+      <h4>Contact</h4>
+      <p>&#128205; 123 College Road, City</p>
+      <p>&#9742; +91 98765 43210</p>
+      <p>&#9993; info@prestigecollege.edu</p>
+    </div>
+    <div>
+      <h4>Follow Us</h4>
+      <a href="#">Facebook</a>
+      <a href="#">Twitter</a>
+      <a href="#">Instagram</a>
+      <a href="#">LinkedIn</a>
+    </div>
+  </section>
+</footer>
+
+<script>
+  (() => {
+    const tabs = Array.from(document.querySelectorAll('.dashboard-tabs .dashboard-tab'));
+    const panels = Array.from(document.querySelectorAll('.student-panel'));
+
+    const activate = (hash) => {
+      const target = (hash || '#profile').replace('#', '');
+      tabs.forEach((tab) => {
+        const href = tab.getAttribute('href') || '';
+        const tabHash = href.includes('#') ? href.slice(href.indexOf('#') + 1) : '';
+        tab.classList.toggle('active', tabHash === target);
+      });
+      panels.forEach((panel) => {
+        panel.classList.toggle('active', panel.id === target);
+      });
+
+      if (target === 'result' && typeof buildLineChart === 'function') {
+        setTimeout(() => buildLineChart('studentResultChart'), 0);
+      }
+    };
+
+    activate(window.location.hash);
+    window.addEventListener('hashchange', () => activate(window.location.hash));
+  })();
+</script>
+
+<%- include('../partials/layout-bottom') %>

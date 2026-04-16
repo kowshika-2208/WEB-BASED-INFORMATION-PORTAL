@@ -1,0 +1,16 @@
+<%- include('../partials/layout-top', { title, user, activeSection }) %>
+
+<section class="header-row"><h1>Faculty Overview</h1></section>
+
+<section class="grid cards-3">
+  <div class="card"><h3>Assigned Students</h3><p><%= data.students.length %></p></div>
+  <div class="card"><h3>Pending Leaves</h3><p><%= data.pendingLeaves.filter(l => l.status === 'Pending').length %></p></div>
+  <div class="card"><h3>Analytics Semesters</h3><p><%= data.analytics.length %></p></div>
+</section>
+
+<section class="card">
+  <h3>Performance Trend</h3>
+  <canvas id="facultyAnalyticsChart" data-labels='<%- JSON.stringify(data.analytics.map(d => `Sem ${d.semester}`)) %>' data-values='<%- JSON.stringify(data.analytics.map(d => Number(d.avg_cgpa || 0))) %>'></canvas>
+</section>
+
+<%- include('../partials/layout-bottom') %>

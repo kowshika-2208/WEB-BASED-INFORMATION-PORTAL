@@ -1,0 +1,132 @@
+<%- include('../partials/layout-top', { title, user, activeSection }) %>
+
+<%
+  const attendanceEntries = data.attendanceEntries || [];
+  const getBand = (value) => {
+    const v = Number(value || 0);
+    if (v >= 90) return 'Excellent';
+    if (v >= 75) return 'Good';
+    return 'Low';
+  };
+%>
+
+<section class="header-row"><h1>Attendance Entry</h1></section>
+
+<section class="grid cards-2">
+  <div class="card">
+    <h3>Quick Attendance Update</h3>
+    <p>Select student name, view details, and update attendance.</p>
+    <form method="POST" action="/faculty/attendance" class="stack-form" id="quickAttendanceForm">
+      <select name="student_id" id="attendanceStudentSelect" required>
+        <option value="">Select Student</option>
+        <% data.students.forEach(s => { %>
+          <option
+            value="<%= s.student_id %>"
+            data-name="<%= s.name %>"
+            data-email="<%= s.email %>"
+            data-department="<%= s.department %>"
+            data-semester="<%= s.semester %>"
+            data-cgpa="<%= s.cgpa_overall %>"><%= s.name %> (ID <%= s.student_id %>)</option>
+        <% }) %>
+      </select>
+      <div class="demo-creds" id="selectedAttendanceStudentInfo">
+        <h3>Student Details</h3>
+        <p>Select a student to view details.</p>
+      </div>
+      <input name="semester" type="number" min="1" max="12" placeholder="Semester" required />
+      <input name="attendance_percentage" type="number" min="0" max="100" step="0.01" placeholder="Attendance %" required />
+      <button type="submit">Save Attendance</button>
+    </form>
+  </div>
+  <div class="card">
+    <h3>All Student Details</h3>
+    <table>
+      <thead><tr><th>ID</th><th>Name</th><th>Department</th><th>Sem</th><th>CGPA</th></tr></thead>
+      <tbody>
+        <% data.students.forEach(s => { %>
+          <tr>
+            <td><%= s.student_id %></td>
+            <td><%= s.name %></td>
+            <td><%= s.department %></td>
+            <td><%= s.semester %></td>
+            <td><%= s.cgpa_overall %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="card">
+  <h3>Existing Attendance and Quick Update</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Student</th>
+        <th>Department</th>
+        <th>Semester</th>
+        <th>Attendance %</th>
+        <th>Band</th>
+        <th>Update</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% attendanceEntries.forEach(row => { %>
+        <tr>
+          <td><strong><%= row.student_name %></strong><br /><small>ID: <%= row.student_id %> | <%= row.email %></small></td>
+          <td><%= row.department %></td>
+          <td><%= row.semester %></td>
+          <td><%= Number(row.attendance_percentage || 0).toFixed(2) %></td>
+          <td><%= getBand(row.attendance_percentage) %></td>
+          <td>
+            <form method="POST" action="/faculty/attendance" class="stack-form">
+              <input type="hidden" name="student_id" value="<%= row.student_id %>" />
+              <input type="hidden" name="semester" value="<%= row.semester %>" />
+              <input name="attendance_percentage" type="number" min="0" max="100" step="0.01" value="<%= row.attendance_percentage %>" required />
+              <button type="submit">Update</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+      <% if (!attendanceEntries.length) { %>
+        <tr><td colspan="6">No attendance records found. Add first record above.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</section>
+
+<script>
+  (() => {
+    const select = document.getElementById('attendanceStudentSelect');
+    const info = document.getElementById('selectedAttendanceStudentInfo');
+    const form = document.getElementById('quickAttendanceForm');
+    if (!select || !info || !form) return;
+
+    const semesterInput = form.querySelector('input[name="semester"]');
+
+    const updateInfo = () => {
+      const option = select.options[select.selectedIndex];
+      if (!option || !option.value) {
+        info.innerHTML = '<h3>Student Details</h3><p>Select a student to view details.</p>';
+        return;
+      }
+
+      if (semesterInput) semesterInput.value = option.dataset.semester || '';
+
+      info.innerHTML = `
+        <h3>Student Details</h3>
+        <p><strong>Name:</strong> ${option.dataset.name || '-'}</p>
+        <p><strong>ID:</strong> ${option.value}</p>
+        <p><strong>Email:</strong> ${option.dataset.email || '-'}</p>
+        <p><strong>Department:</strong> ${option.dataset.department || '-'}</p>
+        <p><strong>Semester:</strong> ${option.dataset.semester || '-'}</p>
+        <p><strong>CGPA:</strong> ${option.dataset.cgpa || '-'}</p>
+      `;
+    };
+
+    select.addEventListener('change', updateInfo);
+    updateInfo();
+  })();
+</script>
+
+<%- include('../partials/layout-bottom') %>

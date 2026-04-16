@@ -1,0 +1,24 @@
+<%- include('../partials/layout-top', { title, user, activeSection }) %>
+
+<section class="header-row"><h1>Hall Ticket</h1></section>
+
+<section class="grid cards-2">
+  <div class="card">
+    <h3>Availability</h3>
+    <p>Status: <strong><%= data.profile.hall_ticket_available ? 'Available' : 'Pending' %></strong></p>
+    <p>Student: <%= data.profile.name %></p>
+    <p>Department: <%= data.profile.department %></p>
+    <p>Semester: <%= data.profile.semester %></p>
+    <% if (data.profile.hall_ticket_available) { %>
+      <a class="btn" href="/student/hall-ticket/download">Download Hall Ticket PDF</a>
+    <% } %>
+  </div>
+  <div class="card">
+    <h3>Instructions</h3>
+    <p>Carry your hall ticket and valid ID for examinations.</p>
+    <p>Verify exam center details before exam day.</p>
+    <p>Contact exam cell for discrepancies.</p>
+  </div>
+</section>
+
+<%- include('../partials/layout-bottom') %>

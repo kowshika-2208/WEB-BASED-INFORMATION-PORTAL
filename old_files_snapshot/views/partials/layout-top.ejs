@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> | CIP</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script defer src="/js/theme.js"></script>
+</head>
+<body class="landing-page page-dashboard page-dashboard-<%= user.role %>">
+  <%
+    const roleLabel = user.role === 'student' ? 'Student Dashboard' : user.role === 'faculty' ? 'Faculty Dashboard' : 'Admin Dashboard';
+    const roleNav = user.role === 'student'
+      ? [
+          { key: 'profile', href: '/student/dashboard#profile', label: 'Profile', icon: '&#128100;' },
+          { key: 'attendance', href: '/student/dashboard#attendance', label: 'Attendance', icon: '&#128202;' },
+          { key: 'marks', href: '/student/dashboard#marks', label: 'Marks', icon: '&#128214;' },
+          { key: 'result', href: '/student/dashboard#result', label: 'Result', icon: '&#127942;' },
+          { key: 'leave', href: '/student/dashboard#leave', label: 'Leave', icon: '&#128197;' },
+          { key: 'fees', href: '/student/dashboard#fees', label: 'Fees', icon: '&#128179;' },
+          { key: 'hall-ticket', href: '/student/dashboard#hall-ticket', label: 'Hall Ticket', icon: '&#127915;' },
+          { key: 'timetable', href: '/student/dashboard#timetable', label: 'Timetable', icon: '&#128339;' }
+        ]
+      : user.role === 'faculty'
+        ? [
+            { key: 'overview', href: '/faculty/dashboard', label: 'Overview', icon: '&#128200;' },
+            { key: 'students', href: '/faculty/students', label: 'Students', icon: '&#128101;' },
+            { key: 'marks', href: '/faculty/marks', label: 'Marks', icon: '&#128221;' },
+            { key: 'attendance', href: '/faculty/attendance', label: 'Attendance', icon: '&#9989;' },
+            { key: 'leaves', href: '/faculty/leaves', label: 'Leaves', icon: '&#128197;' },
+            { key: 'analytics', href: '/faculty/analytics', label: 'Analytics', icon: '&#128202;' }
+          ]
+        : [
+            { key: 'overview', href: '/admin/dashboard', label: 'Overview', icon: '&#128200;' },
+            { key: 'students', href: '/admin/students', label: 'Students', icon: '&#127891;' },
+            { key: 'faculty', href: '/admin/faculty', label: 'Faculty', icon: '&#128104;' },
+            { key: 'operations', href: '/admin/operations', label: 'Operations', icon: '&#9881;' },
+            { key: 'reports', href: '/admin/reports', label: 'Reports', icon: '&#128202;' },
+            { key: 'queries', href: '/admin/queries', label: 'Queries', icon: '&#128276;' }
+          ];
+  %>
+
+  <header class="landing-nav-wrap">
+    <nav class="landing-nav">
+      <a class="brand-mark" href="/">
+        <span class="brand-icon">&#127891;</span>
+        <span>BIT</span>
+      </a>
+      <div class="landing-links">
+        <a href="/">Home</a>
+        <a href="/about-college">About</a>
+        <a href="/departments">Departments</a>
+        <a href="/faculty">Faculty</a>
+        <a href="/placements">Placements</a>
+        <a href="/login">Login</a>
+        <a href="/contact">Contact</a>
+        <span class="mode-icon">&#9789;</span>
+      </div>
+    </nav>
+  </header>
+
+  <main class="dashboard-content">
+    <section class="dashboard-topbar">
+      <h1><%= roleLabel %></h1>
+      <a class="dashboard-logout" href="/logout">&#10140; Logout</a>
+    </section>
+
+    <section class="dashboard-tabs">
+      <% roleNav.forEach(item => { %>
+        <a class="dashboard-tab <%= activeSection === item.key ? 'active' : '' %>" href="<%= item.href %>">
+          <span class="tab-icon"><%- item.icon %></span>
+          <span><%= item.label %></span>
+          <% if (user.role === 'admin' && item.key === 'queries' && typeof unreadQueryCount !== 'undefined' && unreadQueryCount > 0) { %>
+            <span class="notify-pill"><%= unreadQueryCount %></span>
+          <% } %>
+        </a>
+      <% }) %>
+    </section>
+
+
+

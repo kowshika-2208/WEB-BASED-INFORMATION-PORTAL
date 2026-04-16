@@ -1,0 +1,36 @@
+{
+  "name": "college-information-portal",
+  "version": "1.0.0",
+  "description": "Professional College Information Portal (CIP) with MVC, JWT auth, MySQL, and Chart.js dashboards.",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "db:init": "node sql/init-schema.js",
+    "seed": "node sql/seed.js"
+  },
+  "keywords": [
+    "cip",
+    "college",
+    "portal",
+    "mvc",
+    "express",
+    "mysql"
+  ],
+  "author": "Codex",
+  "license": "MIT",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^16.6.1",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "express-validator": "^7.3.0",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.15.2",
+    "pdfkit": "^0.17.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}

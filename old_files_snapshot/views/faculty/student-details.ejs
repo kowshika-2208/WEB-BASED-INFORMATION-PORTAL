@@ -1,0 +1,81 @@
+<%- include('../partials/layout-top', { title, user, activeSection }) %>
+
+<section class="header-row">
+  <h1>Student Details</h1>
+  <a class="btn" href="/faculty/students">Back to Students</a>
+</section>
+
+<section class="grid cards-3">
+  <div class="card"><h3>Name</h3><p><%= details.student.name %></p></div>
+  <div class="card"><h3>Department</h3><p><%= details.student.department %></p></div>
+  <div class="card"><h3>Semester</h3><p><%= details.student.semester %></p></div>
+</section>
+
+<section class="grid cards-2">
+  <div class="card">
+    <h3>Profile</h3>
+    <p><strong>Email:</strong> <%= details.student.email %></p>
+    <p><strong>CGPA:</strong> <%= details.student.cgpa_overall %></p>
+    <p><strong>Father:</strong> <%= details.student.father_name %></p>
+    <p><strong>Mother:</strong> <%= details.student.mother_name %></p>
+    <p><strong>Contact:</strong> <%= details.student.contact %></p>
+  </div>
+  <div class="card">
+    <h3>Attendance</h3>
+    <table>
+      <thead><tr><th>Semester</th><th>%</th></tr></thead>
+      <tbody>
+        <% details.attendance.forEach(a => { %>
+          <tr><td><%= a.semester %></td><td><%= a.attendance_percentage %></td></tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="card">
+  <h3>Previous Leave Details</h3>
+  <table>
+    <thead><tr><th>ID</th><th>Reason</th><th>From</th><th>To</th><th>Status</th></tr></thead>
+    <tbody>
+      <% details.leaves.forEach(l => { %>
+        <tr><td><%= l.id %></td><td><%= l.reason %></td><td><%= new Date(l.from_date).toLocaleDateString() %></td><td><%= new Date(l.to_date).toLocaleDateString() %></td><td><%= l.status %></td></tr>
+      <% }) %>
+      <% if (details.leaves.length === 0) { %>
+        <tr><td colspan="5">No leave records found.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</section>
+
+<section class="card">
+  <h3>Marks</h3>
+  <table>
+    <thead><tr><th>Semester</th><th>Subject</th><th>Internal</th><th>External</th><th>Total</th></tr></thead>
+    <tbody>
+      <% details.marks.forEach(m => { %>
+        <tr><td><%= m.semester %></td><td><%= m.subject %></td><td><%= m.internal_marks %></td><td><%= m.external_marks %></td><td><%= Number(m.internal_marks) + Number(m.external_marks) %></td></tr>
+      <% }) %>
+      <% if (details.marks.length === 0) { %>
+        <tr><td colspan="5">No marks found.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</section>
+
+<section class="card">
+  <h3>Fees</h3>
+  <table>
+    <thead><tr><th>Semester</th><th>Amount</th><th>Status</th></tr></thead>
+    <tbody>
+      <% details.fees.forEach(f => { %>
+        <tr><td><%= f.semester %></td><td><%= f.amount %></td><td><%= f.status %></td></tr>
+      <% }) %>
+      <% if (details.fees.length === 0) { %>
+        <tr><td colspan="3">No fee records found.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</section>
+
+<%- include('../partials/layout-bottom') %>
