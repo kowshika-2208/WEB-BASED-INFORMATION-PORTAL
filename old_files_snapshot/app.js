@@ -41,10 +41,17 @@ app.use((req, res) => {
 
 app.use((err, req, res, next) => {
   console.error('Unhandled Error:', err);
-  const dbErrors = new Set(['ECONNREFUSED', 'ER_ACCESS_DENIED_ERROR', 'ER_BAD_DB_ERROR']);
-  const isDbError = err && (dbErrors.has(err.code) || /mysql|database/i.test(String(err.message || '')));
+  const dbErrors = new Set([
+    'ECONNREFUSED',
+    'ER_ACCESS_DENIED_ERROR',
+    'ER_BAD_DB_ERROR',
+    '3D000',
+    '28P01',
+    'ECONNRESET'
+  ]);
+  const isDbError = err && (dbErrors.has(err.code) || /postgres|database/i.test(String(err.message || '')));
   const message = isDbError
-    ? 'Database connection failed. Check DB settings in .env, then run sql/schema.sql and npm run seed.'
+    ? 'Database connection failed. Check DB settings in .env, then run npm run db:init and npm run seed.'
     : 'Something went wrong. Please try again later.';
   return res.status(500).render('partials/error', {
     title: 'Server Error',

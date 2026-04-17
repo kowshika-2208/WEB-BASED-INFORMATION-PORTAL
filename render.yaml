@@ -1,23 +1,9 @@
-services:
-  - type: pserv
-    runtime: docker
-    name: cip-mysql
-    repo: https://github.com/render-examples/mysql.git
-    plan: starter
-    envVars:
-      - key: MYSQL_DATABASE
-        value: cip_db
-      - key: MYSQL_USER
-        value: cip_user
-      - key: MYSQL_PASSWORD
-        generateValue: true
-      - key: MYSQL_ROOT_PASSWORD
-        generateValue: true
-    disk:
-      name: mysql-data
-      mountPath: /var/lib/mysql
-      sizeGB: 10
+databases:
+  - name: cip-postgres
+    plan: free
+    databaseName: cip_db
 
+services:
   - type: web
     runtime: node
     name: college-information-portal
@@ -28,31 +14,30 @@ services:
     autoDeployTrigger: commit
     healthCheckPath: /healthz
     envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: cip-postgres
+          property: connectionString
       - key: DB_HOST
-        fromService:
-          type: pserv
-          name: cip-mysql
+        fromDatabase:
+          name: cip-postgres
           property: host
       - key: DB_PORT
-        fromService:
-          type: pserv
-          name: cip-mysql
+        fromDatabase:
+          name: cip-postgres
           property: port
       - key: DB_NAME
-        fromService:
-          type: pserv
-          name: cip-mysql
-          envVarKey: MYSQL_DATABASE
+        fromDatabase:
+          name: cip-postgres
+          property: database
       - key: DB_USER
-        fromService:
-          type: pserv
-          name: cip-mysql
-          envVarKey: MYSQL_USER
+        fromDatabase:
+          name: cip-postgres
+          property: user
       - key: DB_PASSWORD
-        fromService:
-          type: pserv
-          name: cip-mysql
-          envVarKey: MYSQL_PASSWORD
+        fromDatabase:
+          name: cip-postgres
+          property: password
       - key: JWT_SECRET
         generateValue: true
       - key: JWT_EXPIRES_IN

@@ -124,9 +124,12 @@ const isDbUnavailable = (error) => {
     'ECONNREFUSED',
     'ER_ACCESS_DENIED_ERROR',
     'ER_BAD_DB_ERROR',
-    'PROTOCOL_CONNECTION_LOST'
+    'PROTOCOL_CONNECTION_LOST',
+    '3D000',
+    '28P01',
+    'ECONNRESET'
   ]);
-  return Boolean(error && (dbCodes.has(error.code) || /mysql|database/i.test(String(error.message || ''))));
+  return Boolean(error && (dbCodes.has(error.code) || /postgres|database/i.test(String(error.message || ''))));
 };
 
 const findFallbackUserByCredentials = (email, password) =>

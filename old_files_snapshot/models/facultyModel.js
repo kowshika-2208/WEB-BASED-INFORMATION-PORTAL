@@ -193,8 +193,8 @@ const createFaculty = async ({ name, email, hashedPassword, department }) => {
   const conn = await db.getConnection();
   try {
     await conn.beginTransaction();
-    const [userResult] = await conn.execute(
-      'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
+    const [, userResult] = await conn.execute(
+      'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?) RETURNING id',
       [name, email, hashedPassword, 'faculty']
     );
     await conn.execute('INSERT INTO faculty (user_id, department) VALUES (?, ?)', [userResult.insertId, department]);

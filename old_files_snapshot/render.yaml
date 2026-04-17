@@ -8,12 +8,12 @@ services:
     startCommand: npm start
     autoDeploy: true
     envVars:
-      - key: PORT
-        value: 3000
+      - key: DATABASE_URL
+        sync: false
       - key: DB_HOST
         sync: false
       - key: DB_PORT
-        value: 3306
+        value: 5432
       - key: DB_USER
         sync: false
       - key: DB_PASSWORD

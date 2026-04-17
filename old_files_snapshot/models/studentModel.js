@@ -101,8 +101,8 @@ const createStudent = async (payload) => {
   const conn = await db.getConnection();
   try {
     await conn.beginTransaction();
-    const [userResult] = await conn.execute(
-      'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
+    const [, userResult] = await conn.execute(
+      'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?) RETURNING id',
       [name, email, hashedPassword, 'student']
     );
 

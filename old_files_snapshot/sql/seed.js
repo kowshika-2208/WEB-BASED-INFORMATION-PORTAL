@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt');
-const mysql = require('mysql2/promise');
+const db = require('../config/db');
 require('dotenv').config();
 
 const departments = ['Computer Science', 'Electronics', 'Mechanical'];
@@ -54,19 +54,12 @@ const buildStudentSeed = () =>
       mother: `${titleCase(lastName)} Devi`,
       contact: `+1-555-${String(1000 + index).padStart(4, '0')}`,
       cgpa: +(7.1 + ((index * 0.17) % 2.6)).toFixed(2),
-      hall: index % 4 === 0 ? 0 : 1
+      hall: index % 4 !== 0
     };
   });
 
 async function seed() {
-  const conn = await mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    port: process.env.DB_PORT || 3306,
-    multipleStatements: true
-  });
+  const conn = await db.getConnection();
 
   try {
     const adminPass = await bcrypt.hash('Admin@123', 10);
@@ -87,6 +80,37 @@ async function seed() {
     await conn.execute('DELETE FROM users');
 
     await conn.execute(
+      "SELECT setval(pg_get_serial_sequence('users', 'id'), 1, false)"
+    );
+    await conn.execute(
+      "SELECT setval(pg_get_serial_sequence('faculty', 'id'), 1, false)"
+    );
+    await conn.execute(
+      "SELECT setval(pg_get_serial_sequence('students', 'id'), 1, false)"
+    );
+    await conn.execute(
+      "SELECT setval(pg_get_serial_sequence('marks', 'id'), 1, false)"
+    );
+    await conn.execute(
+      "SELECT setval(pg_get_serial_sequence('attendance', 'id'), 1, false)"
+    );
+    await conn.execute(
+      "SELECT setval(pg_get_serial_sequence('leaves', 'id'), 1, false)"
+    );
+    await conn.execute(
+      "SELECT setval(pg_get_serial_sequence('fees', 'id'), 1, false)"
+    );
+    await conn.execute(
+      "SELECT setval(pg_get_serial_sequence('semesters', 'id'), 1, false)"
+    );
+    await conn.execute(
+      "SELECT setval(pg_get_serial_sequence('student_queries', 'id'), 1, false)"
+    );
+    await conn.execute(
+      "SELECT setval(pg_get_serial_sequence('student_feedback', 'id'), 1, false)"
+    );
+
+    await conn.execute(
       'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
       ['System Admin', 'admin@cip.edu', adminPass, 'admin']
     );
@@ -99,12 +123,12 @@ async function seed() {
 
     const facultyIds = [];
     for (const fac of facultySeed) {
-      const [fUser] = await conn.execute(
-        'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
+      const [, fUser] = await conn.execute(
+        'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?) RETURNING id',
         [fac.name, fac.email, facultyPass, 'faculty']
       );
-      const [facRow] = await conn.execute(
-        'INSERT INTO faculty (user_id, department) VALUES (?, ?)',
+      const [, facRow] = await conn.execute(
+        'INSERT INTO faculty (user_id, department) VALUES (?, ?) RETURNING id',
         [fUser.insertId, fac.dept]
       );
       facultyIds.push({ id: facRow.insertId, dept: fac.dept });
@@ -122,35 +146,36 @@ async function seed() {
       const s = students[i];
       const assignedFaculty = primaryFaculty;
 
-      const [sUser] = await conn.execute(
-        'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
+      const [, sUser] = await conn.execute(
+        'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?) RETURNING id',
         [s.name, s.email, studentPass, 'student']
       );
 
-      const [stu] = await conn.execute(
+      const [, stu] = await conn.execute(
         `INSERT INTO students (user_id, department, semester, faculty_id, father_name, mother_name, contact, cgpa_overall, hall_ticket_available)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`,
         [sUser.insertId, s.dept, s.sem, assignedFaculty.id, s.father, s.mother, s.contact, s.cgpa, s.hall]
       );
 
+      const studentId = stu.insertId;
       const semCurrent = s.sem;
       const semPrev = semCurrent > 1 ? semCurrent - 1 : semCurrent;
 
       await conn.execute(
         'INSERT INTO attendance (student_id, semester, attendance_percentage) VALUES (?, ?, ?), (?, ?, ?)',
         [
-          stu.insertId, semPrev, Math.min(98, 76 + (i % 18)),
-          stu.insertId, semCurrent, Math.min(99, 81 + (i % 17))
+          studentId, semPrev, Math.min(98, 76 + (i % 18)),
+          studentId, semCurrent, Math.min(99, 81 + (i % 17))
         ]
       );
 
       const marksPayload = [
-        stu.insertId, previousSubjects[0], 25 + (i % 11), 38 + (i % 22), semPrev,
-        stu.insertId, previousSubjects[1], 26 + (i % 10), 39 + (i % 20), semPrev,
-        stu.insertId, previousSubjects[2], 27 + (i % 9), 40 + (i % 18), semPrev,
-        stu.insertId, currentSubjects[0], 28 + (i % 10), 41 + (i % 17), semCurrent,
-        stu.insertId, currentSubjects[1], 29 + (i % 8), 42 + (i % 16), semCurrent,
-        stu.insertId, currentSubjects[2], 30 + (i % 7), 43 + (i % 15), semCurrent
+        studentId, previousSubjects[0], 25 + (i % 11), 38 + (i % 22), semPrev,
+        studentId, previousSubjects[1], 26 + (i % 10), 39 + (i % 20), semPrev,
+        studentId, previousSubjects[2], 27 + (i % 9), 40 + (i % 18), semPrev,
+        studentId, currentSubjects[0], 28 + (i % 10), 41 + (i % 17), semCurrent,
+        studentId, currentSubjects[1], 29 + (i % 8), 42 + (i % 16), semCurrent,
+        studentId, currentSubjects[2], 30 + (i % 7), 43 + (i % 15), semCurrent
       ];
 
       await conn.execute(
@@ -161,23 +186,23 @@ async function seed() {
       await conn.execute(
         'INSERT INTO fees (student_id, semester, amount, status) VALUES (?, ?, ?, ?), (?, ?, ?, ?)',
         [
-          stu.insertId, semPrev, 2400 + (i * 35), 'Paid',
-          stu.insertId, semCurrent, 2600 + (i * 35), i % 5 === 0 ? 'Pending' : 'Paid'
+          studentId, semPrev, 2400 + (i * 35), 'Paid',
+          studentId, semCurrent, 2600 + (i * 35), i % 5 === 0 ? 'Pending' : 'Paid'
         ]
       );
 
       await conn.execute(
         'INSERT INTO leaves (student_id, reason, from_date, to_date, status) VALUES (?, ?, ?, ?, ?), (?, ?, ?, ?, ?)',
         [
-          stu.insertId, leaveReasons[i % leaveReasons.length], '2026-01-10', '2026-01-11', i % 4 === 0 ? 'Rejected' : 'Approved',
-          stu.insertId, leaveReasons[(i + 1) % leaveReasons.length], '2026-02-04', '2026-02-05', i % 3 === 0 ? 'Pending' : 'Approved'
+          studentId, leaveReasons[i % leaveReasons.length], '2026-01-10', '2026-01-11', i % 4 === 0 ? 'Rejected' : 'Approved',
+          studentId, leaveReasons[(i + 1) % leaveReasons.length], '2026-02-04', '2026-02-05', i % 3 === 0 ? 'Pending' : 'Approved'
         ]
       );
 
       await conn.execute(
         'INSERT INTO student_queries (student_id, subject, message, status) VALUES (?, ?, ?, ?)',
         [
-          stu.insertId,
+          studentId,
           `Query ${i + 1}`,
           `Student ${s.name} needs clarification about academic progress and monitoring updates.`,
           i % 4 === 0 ? 'Unread' : 'Read'
@@ -188,7 +213,7 @@ async function seed() {
         await conn.execute(
           'INSERT INTO student_feedback (student_id, faculty_id, subject, message) VALUES (?, ?, ?, ?)',
           [
-            stu.insertId,
+            studentId,
             assignedFaculty.id,
             i === 0 ? 'Academic Progress' : 'Attendance Improvement',
             i === 0
@@ -210,7 +235,8 @@ async function seed() {
     console.error(error);
     process.exitCode = 1;
   } finally {
-    await conn.end();
+    conn.release();
+    await db.end();
   }
 }
 
