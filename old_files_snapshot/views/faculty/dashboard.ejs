@@ -1,16 +1,80 @@
 <%- include('../partials/layout-top', { title, user, activeSection }) %>
 
+<%
+  const assignedStudents = data.students || [];
+  const pendingLeaves = data.pendingLeaves || [];
+  const analytics = data.analytics || [];
+  const avgCgpa =
+    assignedStudents.length > 0
+      ? (assignedStudents.reduce((sum, student) => sum + Number(student.cgpa_overall || 0), 0) / assignedStudents.length).toFixed(2)
+      : '0.00';
+  const studentsNeedingAttention = assignedStudents
+    .filter(student => Number(student.cgpa_overall || 0) < 8 || pendingLeaves.some(leave => Number(leave.student_id) === Number(student.student_id)))
+    .sort((a, b) => Number(a.cgpa_overall || 0) - Number(b.cgpa_overall || 0))
+    .slice(0, 5)
+    .map(student => {
+      const studentPendingLeaves = pendingLeaves.filter(leave => Number(leave.student_id) === Number(student.student_id)).length;
+      const monitorReason =
+        studentPendingLeaves > 0
+          ? `${studentPendingLeaves} pending leave request(s)`
+          : 'Academic follow-up recommended';
+
+      return {
+        ...student,
+        monitorReason
+      };
+    });
+  const recentLeaveActivity = [...pendingLeaves]
+    .sort((a, b) => new Date(b.from_date) - new Date(a.from_date))
+    .slice(0, 5);
+%>
+
 <section class="header-row"><h1>Faculty Overview</h1></section>
 
-<section class="grid cards-3">
-  <div class="card"><h3>Assigned Students</h3><p><%= data.students.length %></p></div>
-  <div class="card"><h3>Pending Leaves</h3><p><%= data.pendingLeaves.filter(l => l.status === 'Pending').length %></p></div>
-  <div class="card"><h3>Analytics Semesters</h3><p><%= data.analytics.length %></p></div>
+<section class="grid cards-4">
+  <div class="card"><h3>Assigned Students</h3><p><%= assignedStudents.length %></p></div>
+  <div class="card"><h3>Pending Leaves</h3><p><%= pendingLeaves.length %></p></div>
+  <div class="card"><h3>Analytics Semesters</h3><p><%= analytics.length %></p></div>
+  <div class="card"><h3>Average CGPA</h3><p><%= avgCgpa %></p></div>
 </section>
 
-<section class="card">
-  <h3>Performance Trend</h3>
-  <canvas id="facultyAnalyticsChart" data-labels='<%- JSON.stringify(data.analytics.map(d => `Sem ${d.semester}`)) %>' data-values='<%- JSON.stringify(data.analytics.map(d => Number(d.avg_cgpa || 0))) %>'></canvas>
+<section class="grid cards-2">
+  <section class="card faculty-monitor-card">
+    <h3>Students Needing Attention</h3>
+    <div class="faculty-monitor-list">
+      <% studentsNeedingAttention.forEach(student => { %>
+        <article class="faculty-monitor-item">
+          <div>
+            <strong><%= student.name %></strong>
+            <p>ID <%= student.student_id %> - Sem <%= student.semester %> - CGPA <%= student.cgpa_overall %></p>
+            <p><%= student.monitorReason %></p>
+          </div>
+          <a class="btn" href="/faculty/students/<%= student.student_id %>">View Details</a>
+        </article>
+      <% }) %>
+      <% if (studentsNeedingAttention.length === 0) { %>
+        <p class="faculty-monitor-empty">No students currently need attention.</p>
+      <% } %>
+    </div>
+  </section>
+
+  <section class="card faculty-monitor-card">
+    <h3>Recent Leave Activity</h3>
+    <div class="faculty-monitor-list">
+      <% recentLeaveActivity.forEach(leave => { %>
+        <article class="faculty-monitor-item faculty-monitor-item-compact">
+          <div>
+            <strong><%= leave.student_name %></strong>
+            <p><%= leave.reason %></p>
+          </div>
+          <span class="faculty-status-pill"><%= leave.status %></span>
+        </article>
+      <% }) %>
+      <% if (recentLeaveActivity.length === 0) { %>
+        <p class="faculty-monitor-empty">No recent leave activity.</p>
+      <% } %>
+    </div>
+  </section>
 </section>
 
 <%- include('../partials/layout-bottom') %>

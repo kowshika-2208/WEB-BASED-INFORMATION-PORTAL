@@ -1,86 +1,122 @@
+const createFacultyList = () => [
+  { id: 201, user_id: 2, name: 'Dr. Maya Rao', email: 'faculty@cip.edu', department: 'Computer Science' },
+  { id: 202, user_id: 4, name: 'Dr. Vikram Shah', email: 'vikram.shah@cip.edu', department: 'Electronics' },
+  { id: 203, user_id: 5, name: 'Dr. Nisha Verma', email: 'nisha.verma@cip.edu', department: 'Mechanical' }
+];
+
+const firstNames = [
+  'Arjun', 'Priya', 'Rahul', 'Neha', 'Karan', 'Aditi', 'Sanjay', 'Meera', 'Dev', 'Ananya',
+  'Rohan', 'Ishita', 'Varun', 'Kavya', 'Nikhil', 'Pooja', 'Aman', 'Sneha', 'Harish', 'Diya',
+  'Siddharth', 'Nandini', 'Yash', 'Bhavna', 'Adarsh', 'Tanvi', 'Manav', 'Ritika', 'Sohan', 'Mitali',
+  'Abhishek', 'Keerthi', 'Pranav', 'Lavanya', 'Akash', 'Nisha', 'Gaurav', 'Shreya', 'Vivek', 'Tara',
+  'Ritesh', 'Anika', 'Suraj', 'Pallavi', 'Darshan', 'Manya', 'Tejas', 'Simran', 'Kishore', 'Aarohi'
+];
+const lastNames = [
+  'Patel', 'Menon', 'Singh', 'Iyer', 'Gupta', 'Rao', 'Kulkarni', 'Das', 'Sharma', 'Joseph',
+  'Malhotra', 'Reddy', 'Bose', 'Chopra', 'Nair', 'Saxena', 'Verma', 'Mishra', 'Kapoor', 'Jain',
+  'Agarwal', 'Bhat', 'Pandey', 'Chauhan', 'Dutta', 'Roy', 'Sethi', 'Naidu', 'Kohli', 'Pillai',
+  'Kumar', 'Desai', 'Yadav', 'Thakur', 'Dubey', 'Shetty', 'Tripathi', 'Bansal', 'Bhatt', 'Arora',
+  'Ghosh', 'Tiwari', 'Shukla', 'Kadam', 'Rawat', 'Bajaj', 'Bedi', 'Soni', 'Purohit', 'Mehta'
+];
+const semesterCycle = [3, 4, 5, 6];
+const subjectsPrev = ['Mathematics', 'Data Structures', 'Communication Skills'];
+const subjectsCurrent = ['Database Systems', 'Operating Systems', 'Software Engineering'];
+const leaveReasons = ['Medical leave', 'Family function', 'University event', 'Travel delay', 'Personal emergency'];
+
+const facultyList = createFacultyList();
+const facultyLookup = new Map(facultyList.map((faculty) => [faculty.name, faculty]));
+
+const students = Array.from({ length: 50 }, (_, index) => {
+  const firstName = firstNames[index];
+  const lastName = lastNames[index];
+  return {
+    student_id: 101 + index,
+    name: `${firstName} ${lastName}`,
+    email: index === 0 ? 'student@cip.edu' : `${firstName}.${lastName}${index + 1}@cip.edu`.toLowerCase(),
+    department: 'Computer Science',
+    semester: semesterCycle[index % semesterCycle.length],
+    father_name: `${lastName} Kumar`,
+    mother_name: `${lastName} Devi`,
+    contact: `+91 90000 ${String(index + 1).padStart(5, '0')}`,
+    cgpa_overall: +(7.1 + ((index * 0.17) % 2.6)).toFixed(2),
+    hall_ticket_available: index % 4 === 0 ? 0 : 1,
+    faculty_name: 'Dr. Maya Rao'
+  };
+});
+
+const allMarks = students.flatMap((student, index) => {
+  const semPrev = student.semester > 1 ? student.semester - 1 : student.semester;
+  return [
+    { student_id: student.student_id, semester: semPrev, subject: subjectsPrev[0], internal_marks: 25 + (index % 11), external_marks: 38 + (index % 22) },
+    { student_id: student.student_id, semester: semPrev, subject: subjectsPrev[1], internal_marks: 26 + (index % 10), external_marks: 39 + (index % 20) },
+    { student_id: student.student_id, semester: semPrev, subject: subjectsPrev[2], internal_marks: 27 + (index % 9), external_marks: 40 + (index % 18) },
+    { student_id: student.student_id, semester: student.semester, subject: subjectsCurrent[0], internal_marks: 28 + (index % 10), external_marks: 41 + (index % 17) },
+    { student_id: student.student_id, semester: student.semester, subject: subjectsCurrent[1], internal_marks: 29 + (index % 8), external_marks: 42 + (index % 16) },
+    { student_id: student.student_id, semester: student.semester, subject: subjectsCurrent[2], internal_marks: 30 + (index % 7), external_marks: 43 + (index % 15) }
+  ];
+});
+
+const allAttendance = students.flatMap((student, index) => {
+  const semPrev = student.semester > 1 ? student.semester - 1 : student.semester;
+  return [
+    { student_id: student.student_id, semester: semPrev, attendance_percentage: Math.min(98, 76 + (index % 18)) },
+    { student_id: student.student_id, semester: student.semester, attendance_percentage: Math.min(99, 81 + (index % 17)) }
+  ];
+});
+
+const allFees = students.flatMap((student, index) => {
+  const semPrev = student.semester > 1 ? student.semester - 1 : student.semester;
+  return [
+    { student_id: student.student_id, semester: semPrev, amount: 2400 + (index * 35), status: 'Paid' },
+    { student_id: student.student_id, semester: student.semester, amount: 2600 + (index * 35), status: index % 5 === 0 ? 'Pending' : 'Paid' }
+  ];
+});
+
+const allLeaves = students.flatMap((student, index) => [
+  {
+    id: index * 2 + 1,
+    student_id: student.student_id,
+    reason: leaveReasons[index % leaveReasons.length],
+    from_date: '2026-01-10',
+    to_date: '2026-01-11',
+    status: index % 4 === 0 ? 'Rejected' : 'Approved'
+  },
+  {
+    id: index * 2 + 2,
+    student_id: student.student_id,
+    reason: leaveReasons[(index + 1) % leaveReasons.length],
+    from_date: '2026-02-04',
+    to_date: '2026-02-05',
+    status: index % 3 === 0 ? 'Pending' : 'Approved'
+  }
+]);
+
+const allQueries = students.map((student, index) => ({
+  id: index + 1,
+  student_id: student.student_id,
+  subject: `Query ${index + 1}`,
+  message: `${student.name} needs clarification about academic progress and mentor feedback.`,
+  status: index % 4 === 0 ? 'Unread' : 'Read',
+  created_at: `2026-02-${String((index % 28) + 1).padStart(2, '0')}T09:30:00.000Z`
+}));
+
+const allFeedback = students.slice(0, 4).map((student, index) => ({
+  id: index + 1,
+  student_id: student.student_id,
+  faculty_id: 201,
+  subject: index % 2 === 0 ? 'Academic Progress' : 'Attendance Improvement',
+  message:
+    index % 2 === 0
+      ? `Dear ${student.name}, your progress is being monitored closely. Stay consistent and keep improving your semester performance.`
+      : `Dear ${student.name}, please maintain regular attendance and follow the faculty guidance for this semester.`,
+  faculty_name: 'Dr. Maya Rao',
+  created_at: `2026-03-${String(index + 1).padStart(2, '0')}T10:00:00.000Z`
+}));
+
 const demoUsers = [
   { id: 1, name: 'System Admin', email: 'admin@cip.edu', password: 'Admin@123', role: 'admin' },
   { id: 2, name: 'Dr. Maya Rao', email: 'faculty@cip.edu', password: 'Faculty@123', role: 'faculty' },
-  { id: 3, name: 'Arjun Patel', email: 'student@cip.edu', password: 'Student@123', role: 'student' }
-];
-
-const students = [
-  {
-    student_id: 101,
-    name: 'Arjun Patel',
-    email: 'student@cip.edu',
-    department: 'Computer Science',
-    semester: 5,
-    father_name: 'Ramesh Patel',
-    mother_name: 'Anita Patel',
-    contact: '+91 98765 43210',
-    cgpa_overall: 8.42,
-    hall_ticket_available: 1,
-    faculty_name: 'Dr. Maya Rao'
-  },
-  {
-    student_id: 102,
-    name: 'Priya Menon',
-    email: 'priya.menon@cip.edu',
-    department: 'Computer Science',
-    semester: 5,
-    father_name: 'Suresh Menon',
-    mother_name: 'Latha Menon',
-    contact: '+91 90000 00001',
-    cgpa_overall: 8.88,
-    hall_ticket_available: 1,
-    faculty_name: 'Dr. Maya Rao'
-  },
-  {
-    student_id: 103,
-    name: 'Rahul Singh',
-    email: 'rahul.singh@cip.edu',
-    department: 'Computer Science',
-    semester: 4,
-    father_name: 'Mohan Singh',
-    mother_name: 'Neeta Singh',
-    contact: '+91 90000 00002',
-    cgpa_overall: 7.95,
-    hall_ticket_available: 1,
-    faculty_name: 'Dr. Maya Rao'
-  }
-];
-
-const allMarks = [
-  { student_id: 101, semester: 5, subject: 'Mathematics', internal_marks: 42, external_marks: 78 },
-  { student_id: 101, semester: 5, subject: 'Data Structures', internal_marks: 38, external_marks: 72 },
-  { student_id: 101, semester: 5, subject: 'Digital Electronics', internal_marks: 35, external_marks: 65 },
-  { student_id: 101, semester: 5, subject: 'English', internal_marks: 40, external_marks: 80 },
-  { student_id: 101, semester: 5, subject: 'Physics', internal_marks: 30, external_marks: 60 },
-  { student_id: 102, semester: 5, subject: 'Mathematics', internal_marks: 40, external_marks: 76 },
-  { student_id: 102, semester: 5, subject: 'Data Structures', internal_marks: 37, external_marks: 74 },
-  { student_id: 103, semester: 4, subject: 'Mathematics', internal_marks: 34, external_marks: 66 },
-  { student_id: 103, semester: 4, subject: 'Operating Systems', internal_marks: 32, external_marks: 60 }
-];
-
-const allAttendance = [
-  { student_id: 101, semester: 4, attendance_percentage: 88 },
-  { student_id: 101, semester: 5, attendance_percentage: 92 },
-  { student_id: 102, semester: 5, attendance_percentage: 90 },
-  { student_id: 103, semester: 4, attendance_percentage: 84 }
-];
-
-const allFees = [
-  { student_id: 101, semester: 4, amount: 2600, status: 'Paid' },
-  { student_id: 101, semester: 5, amount: 2800, status: 'Paid' },
-  { student_id: 102, semester: 5, amount: 2800, status: 'Pending' },
-  { student_id: 103, semester: 4, amount: 2500, status: 'Paid' }
-];
-
-const allLeaves = [
-  { id: 1, student_id: 101, reason: 'Medical leave', from_date: '2026-01-10', to_date: '2026-01-11', status: 'Approved' },
-  { id: 2, student_id: 101, reason: 'Family function', from_date: '2026-02-04', to_date: '2026-02-05', status: 'Pending' },
-  { id: 3, student_id: 102, reason: 'Competition', from_date: '2026-02-15', to_date: '2026-02-16', status: 'Approved' }
-];
-
-const allQueries = [
-  { id: 1, student_id: 101, subject: 'Scholarship status', message: 'Please confirm scholarship release date.', status: 'Unread', created_at: '2026-02-14T09:30:00.000Z' },
-  { id: 2, student_id: 102, subject: 'Fee due date', message: 'Need extension for current semester fee.', status: 'Read', created_at: '2026-02-19T10:15:00.000Z' }
+  { id: 3, name: students[0].name, email: 'student@cip.edu', password: 'Student@123', role: 'student' }
 ];
 
 const isDbUnavailable = (error) => {
@@ -95,23 +131,24 @@ const isDbUnavailable = (error) => {
 
 const findFallbackUserByCredentials = (email, password) =>
   demoUsers.find(
-    (u) => String(u.email).toLowerCase() === String(email).toLowerCase() && u.password === password
+    (user) => String(user.email).toLowerCase() === String(email).toLowerCase() && user.password === password
   ) || null;
 
 const getFallbackStudentDashboard = (email) => {
-  const profile = students.find((s) => s.email.toLowerCase() === String(email || '').toLowerCase()) || students[0];
-  const studentMarks = allMarks.filter((m) => m.student_id === profile.student_id);
-  const attendance = allAttendance.filter((a) => a.student_id === profile.student_id);
-  const fees = allFees.filter((f) => f.student_id === profile.student_id);
-  const leaves = allLeaves.filter((l) => l.student_id === profile.student_id);
-  const queries = allQueries.filter((q) => q.student_id === profile.student_id);
+  const profile = students.find((student) => student.email.toLowerCase() === String(email || '').toLowerCase()) || students[0];
+  const studentMarks = allMarks.filter((mark) => mark.student_id === profile.student_id);
+  const attendance = allAttendance.filter((row) => row.student_id === profile.student_id);
+  const fees = allFees.filter((fee) => fee.student_id === profile.student_id);
+  const leaves = allLeaves.filter((leave) => leave.student_id === profile.student_id);
+  const queries = allQueries.filter((query) => query.student_id === profile.student_id);
+  const feedback = allFeedback.filter((item) => item.student_id === profile.student_id);
 
   const semesterMap = new Map();
-  studentMarks.forEach((m) => {
-    const total = Number(m.internal_marks) + Number(m.external_marks);
+  studentMarks.forEach((mark) => {
+    const total = Number(mark.internal_marks) + Number(mark.external_marks);
     const estimatedCgpa = +(total / 10).toFixed(2);
-    if (!semesterMap.has(m.semester)) semesterMap.set(m.semester, []);
-    semesterMap.get(m.semester).push(estimatedCgpa);
+    if (!semesterMap.has(mark.semester)) semesterMap.set(mark.semester, []);
+    semesterMap.get(mark.semester).push(estimatedCgpa);
   });
 
   const semesterCgpa = Array.from(semesterMap.entries()).map(([semester, values]) => {
@@ -119,55 +156,57 @@ const getFallbackStudentDashboard = (email) => {
     return { semester, cgpa: +avg.toFixed(2) };
   });
 
-  return { profile, attendance, marks: studentMarks, fees, leaves, queries, semesterCgpa };
+  return { profile, attendance, marks: studentMarks, fees, leaves, queries, feedback, semesterCgpa };
 };
 
 const getFallbackFacultyData = () => {
-  const facultyStudents = students.map((s) => ({
-    student_id: s.student_id,
-    name: s.name,
-    email: s.email,
-    department: s.department,
-    semester: s.semester,
-    cgpa_overall: s.cgpa_overall
+  const facultyStudents = students.map((student) => ({
+    student_id: student.student_id,
+    name: student.name,
+    email: student.email,
+    department: student.department,
+    semester: student.semester,
+    cgpa_overall: student.cgpa_overall
   }));
 
   const pendingLeaves = allLeaves
-    .filter((l) => l.status === 'Pending')
-    .map((l) => {
-      const student = students.find((s) => s.student_id === l.student_id);
-      return { ...l, student_name: student ? student.name : 'Unknown' };
+    .filter((leave) => leave.status === 'Pending')
+    .map((leave) => {
+      const student = students.find((item) => item.student_id === leave.student_id);
+      return { ...leave, student_name: student ? student.name : 'Unknown' };
     });
 
   const allLeaveRequests = allLeaves
-    .map((l) => {
-      const student = students.find((s) => s.student_id === l.student_id);
-      return { ...l, student_name: student ? student.name : 'Unknown' };
+    .map((leave) => {
+      const student = students.find((item) => item.student_id === leave.student_id);
+      return { ...leave, student_name: student ? student.name : 'Unknown' };
     })
     .sort((a, b) => Number(b.id) - Number(a.id));
 
   const leaveStudents = facultyStudents
-    .filter((s) => allLeaves.some((l) => l.student_id === s.student_id))
-    .map((s) => {
-      const leaves = allLeaves.filter((l) => l.student_id === s.student_id);
+    .filter((student) => allLeaves.some((leave) => leave.student_id === student.student_id))
+    .map((student) => {
+      const leaves = allLeaves.filter((leave) => leave.student_id === student.student_id);
       return {
-        ...s,
+        ...student,
         total_leaves: leaves.length,
-        pending_count: leaves.filter((l) => l.status === 'Pending').length,
+        pending_count: leaves.filter((leave) => leave.status === 'Pending').length,
         latest_leave_date: leaves[0] ? leaves[0].from_date : null
       };
     });
 
   const studentsNoLeaves = facultyStudents.filter(
-    (s) => !allLeaves.some((l) => l.student_id === s.student_id)
+    (student) => !allLeaves.some((leave) => leave.student_id === student.student_id)
   );
 
   const analyticsMap = new Map();
-  facultyStudents.forEach((s) => {
-    if (!analyticsMap.has(s.semester)) analyticsMap.set(s.semester, { cgpa: [], attendance: [] });
-    analyticsMap.get(s.semester).cgpa.push(Number(s.cgpa_overall || 0));
-    const att = allAttendance.find((a) => a.student_id === s.student_id && a.semester === s.semester);
-    analyticsMap.get(s.semester).attendance.push(Number(att ? att.attendance_percentage : 0));
+  facultyStudents.forEach((student) => {
+    if (!analyticsMap.has(student.semester)) analyticsMap.set(student.semester, { cgpa: [], attendance: [] });
+    analyticsMap.get(student.semester).cgpa.push(Number(student.cgpa_overall || 0));
+    const attendanceRow = allAttendance.find(
+      (row) => row.student_id === student.student_id && row.semester === student.semester
+    );
+    analyticsMap.get(student.semester).attendance.push(Number(attendanceRow ? attendanceRow.attendance_percentage : 0));
   });
 
   const analytics = Array.from(analyticsMap.entries())
@@ -184,7 +223,7 @@ const getFallbackFacultyData = () => {
 const getFallbackFacultyMarksEntries = () =>
   allMarks
     .map((mark) => {
-      const student = students.find((s) => Number(s.student_id) === Number(mark.student_id));
+      const student = students.find((item) => Number(item.student_id) === Number(mark.student_id));
       if (!student) return null;
       return {
         student_id: student.student_id,
@@ -209,10 +248,10 @@ const upsertFallbackMark = (studentId, subject, internalMarks, externalMarks, se
       : Number(externalMarks);
 
   const existing = allMarks.find(
-    (m) =>
-      Number(m.student_id) === id &&
-      Number(m.semester) === sem &&
-      String(m.subject).toLowerCase() === String(subject).toLowerCase()
+    (mark) =>
+      Number(mark.student_id) === id &&
+      Number(mark.semester) === sem &&
+      String(mark.subject).toLowerCase() === String(subject).toLowerCase()
   );
 
   if (existing) {
@@ -234,7 +273,7 @@ const upsertFallbackMark = (studentId, subject, internalMarks, externalMarks, se
 const getFallbackFacultyAttendanceEntries = () =>
   allAttendance
     .map((row) => {
-      const student = students.find((s) => Number(s.student_id) === Number(row.student_id));
+      const student = students.find((item) => Number(item.student_id) === Number(row.student_id));
       if (!student) return null;
       return {
         student_id: student.student_id,
@@ -253,7 +292,7 @@ const upsertFallbackAttendance = (studentId, semester, attendancePercentage) => 
   const sem = Number(semester);
   const percentage = Number(attendancePercentage || 0);
 
-  const existing = allAttendance.find((a) => Number(a.student_id) === id && Number(a.semester) === sem);
+  const existing = allAttendance.find((row) => Number(row.student_id) === id && Number(row.semester) === sem);
   if (existing) {
     existing.attendance_percentage = percentage;
     return true;
@@ -269,45 +308,41 @@ const upsertFallbackAttendance = (studentId, semester, attendancePercentage) => 
 
 const getFallbackFacultyStudentDetails = (studentId) => {
   const id = Number(studentId);
-  const student = students.find((s) => s.student_id === id);
+  const student = students.find((item) => item.student_id === id);
   if (!student) return null;
   return {
     student,
-    leaves: allLeaves.filter((l) => l.student_id === id),
-    attendance: allAttendance.filter((a) => a.student_id === id),
-    marks: allMarks.filter((m) => m.student_id === id),
-    fees: allFees.filter((f) => f.student_id === id)
+    leaves: allLeaves.filter((leave) => leave.student_id === id),
+    attendance: allAttendance.filter((row) => row.student_id === id),
+    marks: allMarks.filter((mark) => mark.student_id === id),
+    fees: allFees.filter((fee) => fee.student_id === id),
+    feedback: allFeedback.filter((item) => item.student_id === id)
   };
 };
 
 const getFallbackAdminData = () => {
   const studentCount = students.length;
-  const deptSet = new Set(students.map((s) => s.department));
-  const passCount = students.filter((s) => Number(s.cgpa_overall) >= 5).length;
+  const deptSet = new Set(students.map((student) => student.department));
+  const passCount = students.filter((student) => Number(student.cgpa_overall) >= 5).length;
 
   const departmentBreakdown = Array.from(deptSet).map((department) => ({
     department,
-    total: students.filter((s) => s.department === department).length
+    total: students.filter((student) => student.department === department).length
   }));
 
-  const semSet = new Set(students.map((s) => s.semester));
+  const semSet = new Set(students.map((student) => student.semester));
   const performance = Array.from(semSet)
     .sort((a, b) => a - b)
     .map((semester) => {
-      const rows = students.filter((s) => s.semester === semester);
-      const avg = rows.reduce((sum, s) => sum + Number(s.cgpa_overall || 0), 0) / rows.length;
+      const rows = students.filter((student) => student.semester === semester);
+      const avg = rows.reduce((sum, student) => sum + Number(student.cgpa_overall || 0), 0) / rows.length;
       return { semester, avg_cgpa: +avg.toFixed(2) };
     });
 
-  const faculty = [
-    { id: 201, user_id: 2, name: 'Dr. Maya Rao', email: 'faculty@cip.edu', department: 'Computer Science' },
-    { id: 202, user_id: 4, name: 'Dr. Vikram Shah', email: 'vikram.shah@cip.edu', department: 'Electronics' }
-  ];
-
-  const queries = allQueries.map((q) => {
-    const student = students.find((s) => s.student_id === q.student_id);
+  const queries = allQueries.map((query) => {
+    const student = students.find((item) => item.student_id === query.student_id);
     return {
-      ...q,
+      ...query,
       student_name: student ? student.name : 'Unknown',
       student_email: student ? student.email : '',
       department: student ? student.department : '',
@@ -323,34 +358,38 @@ const getFallbackAdminData = () => {
       departmentBreakdown,
       performance
     },
-    students: students.map((s) => ({
-      id: s.student_id,
-      user_id: s.student_id + 1000,
-      name: s.name,
-      email: s.email,
-      department: s.department,
-      semester: s.semester,
-      cgpa_overall: s.cgpa_overall,
-      faculty_name: s.faculty_name
+    students: students.map((student) => ({
+      id: student.student_id,
+      user_id: student.student_id + 1000,
+      faculty_id: facultyLookup.get(student.faculty_name)?.id || null,
+      name: student.name,
+      email: student.email,
+      department: student.department,
+      semester: student.semester,
+      cgpa_overall: student.cgpa_overall,
+      faculty_name: student.faculty_name
     })),
-    faculty,
+    faculty: facultyList.map((faculty) => ({
+      ...faculty,
+      assigned_students: students.filter((student) => student.faculty_name === faculty.name).length
+    })),
     queries,
-    unreadQueryCount: queries.filter((q) => q.status === 'Unread').length
+    unreadQueryCount: queries.filter((query) => query.status === 'Unread').length
   };
 };
 
 const updateFallbackQueryStatus = (id, status) => {
-  const query = allQueries.find((q) => Number(q.id) === Number(id));
+  const query = allQueries.find((item) => Number(item.id) === Number(id));
   if (!query) return false;
   query.status = status;
   return true;
 };
 
 const submitFallbackLeave = (email, reason, fromDate, toDate) => {
-  const profile = students.find((s) => s.email.toLowerCase() === String(email || '').toLowerCase());
+  const profile = students.find((student) => student.email.toLowerCase() === String(email || '').toLowerCase());
   if (!profile) return false;
 
-  const nextId = allLeaves.length ? Math.max(...allLeaves.map((l) => Number(l.id))) + 1 : 1;
+  const nextId = allLeaves.length ? Math.max(...allLeaves.map((leave) => Number(leave.id))) + 1 : 1;
   allLeaves.unshift({
     id: nextId,
     student_id: profile.student_id,
@@ -363,9 +402,27 @@ const submitFallbackLeave = (email, reason, fromDate, toDate) => {
 };
 
 const updateFallbackLeaveStatus = (leaveId, status) => {
-  const leave = allLeaves.find((l) => Number(l.id) === Number(leaveId));
+  const leave = allLeaves.find((item) => Number(item.id) === Number(leaveId));
   if (!leave) return false;
   leave.status = status;
+  return true;
+};
+
+const submitFallbackFacultyFeedback = (studentId, subject, message) => {
+  const id = Number(studentId);
+  const student = students.find((item) => Number(item.student_id) === id);
+  if (!student) return false;
+
+  const nextId = allFeedback.length ? Math.max(...allFeedback.map((item) => Number(item.id))) + 1 : 1;
+  allFeedback.unshift({
+    id: nextId,
+    student_id: id,
+    faculty_id: 201,
+    subject,
+    message,
+    faculty_name: 'Dr. Maya Rao',
+    created_at: new Date().toISOString()
+  });
   return true;
 };
 
@@ -380,6 +437,7 @@ module.exports = {
   getFallbackAdminData,
   updateFallbackQueryStatus,
   submitFallbackLeave,
+  submitFallbackFacultyFeedback,
   upsertFallbackMark,
   upsertFallbackAttendance,
   updateFallbackLeaveStatus

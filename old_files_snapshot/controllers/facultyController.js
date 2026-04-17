@@ -4,7 +4,8 @@ const {
   getFacultyDashboard,
   getFacultyMarksEntries,
   getFacultyAttendanceEntries,
-  getFacultyStudentDetails
+  getFacultyStudentDetails,
+  addFacultyFeedback
 } = require('../models/facultyModel');
 const {
   isDbUnavailable,
@@ -14,7 +15,8 @@ const {
   upsertFallbackMark,
   upsertFallbackAttendance,
   updateFallbackLeaveStatus,
-  getFallbackFacultyStudentDetails
+  getFallbackFacultyStudentDetails,
+  submitFallbackFacultyFeedback
 } = require('../utils/fallbackData');
 
 const loadFacultyData = async (req, res) => {
@@ -69,6 +71,7 @@ const renderFacultyPage = async (req, res, next, view, title, activeSection) => 
 };
 
 const showDashboard = (req, res, next) => renderFacultyPage(req, res, next, 'faculty/dashboard', 'Faculty Dashboard', 'overview');
+const showMonitor = (req, res, next) => renderFacultyPage(req, res, next, 'faculty/dashboard', 'Faculty Monitor', 'monitor');
 const showStudents = (req, res, next) => renderFacultyPage(req, res, next, 'faculty/students', 'Assigned Students', 'students');
 const showMarks = async (req, res, next) => {
   try {
@@ -262,8 +265,49 @@ const updateLeaveStatus = async (req, res, next) => {
   }
 };
 
+const createStudentFeedback = async (req, res, next) => {
+  try {
+    let faculty;
+    try {
+      faculty = await getFacultyByUserId(req.user.id);
+    } catch (error) {
+      if (isDbUnavailable(error)) {
+        submitFallbackFacultyFeedback(req.params.studentId, req.body.subject, req.body.message);
+        return res.redirect(`/faculty/students/${req.params.studentId}`);
+      }
+      throw error;
+    }
+
+    if (!faculty) {
+      return res.status(404).render('partials/error', {
+        title: 'Not Found',
+        message: 'Faculty record was not found.',
+        user: req.user
+      });
+    }
+
+    const inserted = await addFacultyFeedback(faculty.id, req.params.studentId, req.body.subject, req.body.message);
+    if (!inserted) {
+      return res.status(404).render('partials/error', {
+        title: 'Student Not Found',
+        message: 'Student not found under your mentorship.',
+        user: req.user
+      });
+    }
+
+    return res.redirect(`/faculty/students/${req.params.studentId}`);
+  } catch (error) {
+    if (isDbUnavailable(error)) {
+      submitFallbackFacultyFeedback(req.params.studentId, req.body.subject, req.body.message);
+      return res.redirect(`/faculty/students/${req.params.studentId}`);
+    }
+    return next(error);
+  }
+};
+
 module.exports = {
   showDashboard,
+  showMonitor,
   showStudents,
   showMarks,
   showAttendance,
@@ -272,5 +316,6 @@ module.exports = {
   showStudentDetails,
   upsertMarks,
   upsertAttendance,
-  updateLeaveStatus
+  updateLeaveStatus,
+  createStudentFeedback
 };

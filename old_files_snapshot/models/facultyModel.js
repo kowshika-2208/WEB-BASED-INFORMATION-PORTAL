@@ -143,20 +143,47 @@ const getFacultyStudentDetails = async (facultyId, studentId) => {
     [studentId]
   );
 
+  const [feedback] = await db.execute(
+    `SELECT sf.id, sf.subject, sf.message, sf.created_at, u.name AS faculty_name
+     FROM student_feedback sf
+     JOIN faculty f ON f.id = sf.faculty_id
+     JOIN users u ON u.id = f.user_id
+     WHERE sf.student_id = ? AND sf.faculty_id = ?
+     ORDER BY sf.created_at DESC, sf.id DESC`,
+    [studentId, facultyId]
+  );
+
   return {
     student: studentRows[0],
     leaves,
     attendance,
     marks,
-    fees
+    fees,
+    feedback
   };
+};
+
+const addFacultyFeedback = async (facultyId, studentId, subject, message) => {
+  const [rows] = await db.execute(
+    'SELECT id FROM students WHERE id = ? AND faculty_id = ?',
+    [studentId, facultyId]
+  );
+  if (!rows[0]) return false;
+
+  await db.execute(
+    'INSERT INTO student_feedback (student_id, faculty_id, subject, message) VALUES (?, ?, ?, ?)',
+    [studentId, facultyId, subject, message]
+  );
+  return true;
 };
 
 const getAllFaculty = async () => {
   const [rows] = await db.execute(
-    `SELECT f.id, f.user_id, u.name, u.email, f.department
+    `SELECT f.id, f.user_id, u.name, u.email, f.department, COUNT(s.id) AS assigned_students
      FROM faculty f
      JOIN users u ON u.id = f.user_id
+     LEFT JOIN students s ON s.faculty_id = f.id
+     GROUP BY f.id, f.user_id, u.name, u.email, f.department
      ORDER BY u.name`
   );
   return rows;
@@ -210,6 +237,7 @@ module.exports = {
   getFacultyMarksEntries,
   getFacultyAttendanceEntries,
   getFacultyStudentDetails,
+  addFacultyFeedback,
   getAllFaculty,
   createFaculty,
   updateFaculty,

@@ -33,6 +33,28 @@
   </div>
 </section>
 
+<section class="grid cards-2">
+  <div class="card">
+    <h3>Add Feedback For Student</h3>
+    <form method="POST" action="/faculty/students/<%= details.student.student_id %>/feedback" class="stack-form">
+      <input name="subject" placeholder="Feedback subject" required />
+      <textarea name="message" rows="5" placeholder="Write feedback, guidance, or any important note for the student." required></textarea>
+      <button type="submit">Send Feedback</button>
+    </form>
+  </div>
+  <div class="card">
+    <h3>Latest Feedback</h3>
+    <% if ((details.feedback || []).length) { %>
+      <% const latestFeedback = details.feedback[0]; %>
+      <p><strong><%= latestFeedback.subject %></strong></p>
+      <p><%= latestFeedback.message %></p>
+      <p><strong>Shared:</strong> <%= new Date(latestFeedback.created_at).toLocaleString() %></p>
+    <% } else { %>
+      <p>No feedback shared for this student yet.</p>
+    <% } %>
+  </div>
+</section>
+
 <section class="card">
   <h3>Previous Leave Details</h3>
   <table>
@@ -73,6 +95,25 @@
       <% }) %>
       <% if (details.fees.length === 0) { %>
         <tr><td colspan="3">No fee records found.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</section>
+
+<section class="card">
+  <h3>Feedback History</h3>
+  <table>
+    <thead><tr><th>Subject</th><th>Message</th><th>Shared On</th></tr></thead>
+    <tbody>
+      <% (details.feedback || []).forEach(item => { %>
+        <tr>
+          <td><%= item.subject %></td>
+          <td><%= item.message %></td>
+          <td><%= new Date(item.created_at).toLocaleString() %></td>
+        </tr>
+      <% }) %>
+      <% if (!details.feedback || details.feedback.length === 0) { %>
+        <tr><td colspan="3">No feedback records found.</td></tr>
       <% } %>
     </tbody>
   </table>

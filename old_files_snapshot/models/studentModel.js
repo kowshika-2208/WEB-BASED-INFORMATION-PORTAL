@@ -36,6 +36,15 @@ const getStudentDashboard = async (userId) => {
     'SELECT id, subject, message, status, created_at FROM student_queries WHERE student_id = ? ORDER BY id DESC',
     [studentId]
   );
+  const [feedback] = await db.execute(
+    `SELECT sf.id, sf.subject, sf.message, sf.created_at, u.name AS faculty_name
+     FROM student_feedback sf
+     JOIN faculty f ON f.id = sf.faculty_id
+     JOIN users u ON u.id = f.user_id
+     WHERE sf.student_id = ?
+     ORDER BY sf.created_at DESC, sf.id DESC`,
+    [studentId]
+  );
 
   const semesterMap = new Map();
   marks.forEach((m) => {
@@ -57,13 +66,14 @@ const getStudentDashboard = async (userId) => {
     fees,
     leaves,
     queries,
+    feedback,
     semesterCgpa
   };
 };
 
 const getAllStudents = async () => {
   const [rows] = await db.execute(
-    `SELECT s.id, s.user_id, u.name, u.email, s.department, s.semester, s.cgpa_overall,
+    `SELECT s.id, s.user_id, s.faculty_id, u.name, u.email, s.department, s.semester, s.cgpa_overall,
             fu.name AS faculty_name
      FROM students s
      JOIN users u ON u.id = s.user_id

@@ -6,8 +6,22 @@
   <div class="card">
     <h3>Assign Faculty to Student</h3>
     <form method="POST" action="/admin/assign-faculty" class="stack-form">
-      <input name="student_id" type="number" placeholder="Student ID" required />
-      <input name="faculty_id" type="number" placeholder="Faculty ID" required />
+      <select name="student_id" required>
+        <option value="">Select student</option>
+        <% students.forEach(student => { %>
+          <option value="<%= student.id %>">
+            <%= student.name %> (ID: <%= student.id %>, Sem <%= student.semester %>, <%= student.department %>)
+          </option>
+        <% }) %>
+      </select>
+      <select name="faculty_id" required>
+        <option value="">Select faculty</option>
+        <% faculty.forEach(member => { %>
+          <option value="<%= member.id %>">
+            <%= member.name %> (ID: <%= member.id %>, <%= member.department %>)
+          </option>
+        <% }) %>
+      </select>
       <button type="submit">Assign</button>
     </form>
   </div>
@@ -29,6 +43,23 @@
       <button type="submit">Save Semester</button>
     </form>
   </div>
+</section>
+
+<section class="card">
+  <h3>Current Monitoring Assignments</h3>
+  <table>
+    <thead><tr><th>Student</th><th>Department</th><th>Semester</th><th>Monitoring Faculty</th></tr></thead>
+    <tbody>
+      <% students.forEach(student => { %>
+        <tr>
+          <td><%= student.name %> <span class="muted">(ID: <%= student.id %>)</span></td>
+          <td><%= student.department %></td>
+          <td><%= student.semester %></td>
+          <td><%= student.faculty_name || 'Not assigned' %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
 </section>
 
 <%- include('../partials/layout-bottom') %>

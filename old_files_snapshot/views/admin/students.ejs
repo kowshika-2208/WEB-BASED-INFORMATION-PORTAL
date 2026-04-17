@@ -15,7 +15,12 @@
       <input name="mother_name" placeholder="Mother Name" />
       <input name="contact" placeholder="Contact" />
       <input name="cgpa_overall" type="number" step="0.01" min="0" max="10" placeholder="CGPA" value="0" />
-      <input name="faculty_id" type="number" placeholder="Faculty ID (optional)" />
+      <select name="faculty_id">
+        <option value="">Assign faculty later</option>
+        <% faculty.forEach(member => { %>
+          <option value="<%= member.id %>"><%= member.name %> (<%= member.department %>)</option>
+        <% }) %>
+      </select>
       <button type="submit">Create Student</button>
     </form>
   </div>
@@ -26,7 +31,12 @@
       <input name="student_id" type="number" placeholder="Student ID" required />
       <input name="department" placeholder="Department" required />
       <input name="semester" type="number" min="1" max="12" placeholder="Semester" required />
-      <input name="faculty_id" type="number" placeholder="Faculty ID (optional)" />
+      <select name="faculty_id">
+        <option value="">Remove faculty assignment</option>
+        <% faculty.forEach(member => { %>
+          <option value="<%= member.id %>"><%= member.name %> (<%= member.department %>)</option>
+        <% }) %>
+      </select>
       <input name="father_name" placeholder="Father Name" />
       <input name="mother_name" placeholder="Mother Name" />
       <input name="contact" placeholder="Contact" />
@@ -48,7 +58,7 @@
           <td><%= s.email %></td>
           <td><%= s.department %></td>
           <td><%= s.semester %></td>
-          <td><%= s.faculty_name || 'N/A' %></td>
+          <td><%= s.faculty_name || 'Not assigned' %></td>
           <td>
             <form method="POST" action="/admin/students/<%= s.id %>/delete" class="inline-form">
               <button type="submit" class="danger">Delete</button>

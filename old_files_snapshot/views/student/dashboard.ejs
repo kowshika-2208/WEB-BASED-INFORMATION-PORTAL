@@ -3,6 +3,8 @@
 <%
   const profile = data.profile || {};
   const marks = data.marks || [];
+  const feedback = data.feedback || [];
+  const latestFeedback = feedback[0] || null;
   const currentSemesterMarks = marks.filter((m) => Number(m.semester) === Number(profile.semester));
   const markRows = currentSemesterMarks.length ? currentSemesterMarks : marks;
   const rollNo = `21CSE${String(profile.student_id || 0).padStart(3, '0')}`;
@@ -81,6 +83,17 @@
 
 <section class="student-dashboard-panels">
   <article id="profile" class="student-panel active">
+    <% if (latestFeedback) { %>
+      <div class="student-card feedback-alert-card">
+        <div class="feedback-alert-head">
+          <h3>Faculty Feedback Notification</h3>
+          <span><%= latestFeedback.faculty_name || 'Faculty' %></span>
+        </div>
+        <p><strong><%= latestFeedback.subject %></strong></p>
+        <p><%= latestFeedback.message %></p>
+        <p>Shared on <%= new Date(latestFeedback.created_at).toLocaleString() %></p>
+      </div>
+    <% } %>
     <div class="student-card student-profile-card">
       <div class="student-avatar"><%= String(profile.name || 'S').trim().slice(0, 2).toUpperCase() %></div>
       <div class="student-info-grid">
@@ -93,6 +106,33 @@
         <div class="info-row"><span>Father Name:</span><strong><%= profile.father_name || 'N/A' %></strong></div>
         <div class="info-row"><span>Mother Name:</span><strong><%= profile.mother_name || 'N/A' %></strong></div>
       </div>
+    </div>
+
+    <div class="student-card table-card">
+      <h3>Feedback From Faculty</h3>
+      <table class="student-data-table">
+        <thead>
+          <tr>
+            <th>Subject</th>
+            <th>Message</th>
+            <th>Faculty</th>
+            <th>Shared On</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% feedback.forEach((item) => { %>
+            <tr>
+              <td><strong><%= item.subject %></strong></td>
+              <td><%= item.message %></td>
+              <td><%= item.faculty_name || 'Faculty' %></td>
+              <td><%= new Date(item.created_at).toLocaleString() %></td>
+            </tr>
+          <% }) %>
+          <% if (!feedback.length) { %>
+            <tr><td colspan="4">No faculty feedback available yet.</td></tr>
+          <% } %>
+        </tbody>
+      </table>
     </div>
   </article>
 

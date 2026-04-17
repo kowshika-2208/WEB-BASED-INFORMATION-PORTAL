@@ -27,7 +27,7 @@
 <section class="card">
   <h3>Faculty</h3>
   <table>
-    <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Department</th><th>Actions</th></tr></thead>
+    <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Department</th><th>Assigned Students</th><th>Actions</th></tr></thead>
     <tbody>
       <% faculty.forEach(f => { %>
         <tr>
@@ -35,6 +35,7 @@
           <td><%= f.name %></td>
           <td><%= f.email %></td>
           <td><%= f.department %></td>
+          <td><%= f.assigned_students %></td>
           <td>
             <form method="POST" action="/admin/faculty/<%= f.id %>/delete" class="inline-form">
               <button type="submit" class="danger">Delete</button>

@@ -135,6 +135,25 @@ button.danger { background: var(--danger); }
 
 .card h3 { margin-top: 0; }
 
+.feedback-alert-card {
+  margin-bottom: 16px;
+  border-left: 5px solid #2563eb;
+  background: linear-gradient(145deg, #eff6ff 0%, #dbeafe 100%);
+}
+
+.feedback-alert-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.feedback-alert-head span {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1d4ed8;
+}
+
 .stack-form {
   display: grid;
   gap: 10px;
@@ -3366,6 +3385,77 @@ body.page-dashboard-student .dashboard-content .card:nth-of-type(odd) {
 
 body.page-dashboard-faculty .dashboard-content .card:nth-of-type(odd) {
   background: linear-gradient(145deg, #f0fdf4 0%, #dcfce7 100%);
+}
+
+.faculty-monitor-card,
+.faculty-summary-card {
+  min-height: 100%;
+}
+
+.faculty-monitor-list {
+  display: grid;
+  gap: 12px;
+}
+
+.faculty-monitor-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid #dbe4ff;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.faculty-monitor-item strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.faculty-monitor-item p,
+.faculty-summary-card p,
+.faculty-monitor-empty {
+  margin: 0;
+  color: #4e617b;
+}
+
+.faculty-monitor-item-compact {
+  align-items: flex-start;
+}
+
+.faculty-status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 90px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.faculty-status-pill.is-good {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.faculty-status-pill.is-warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+body.theme-dark .faculty-monitor-item {
+  background: rgba(17, 24, 39, 0.75);
+  border-color: #334155;
+}
+
+body.theme-dark .faculty-monitor-item p,
+body.theme-dark .faculty-summary-card p,
+body.theme-dark .faculty-monitor-empty {
+  color: #cbd5e1;
 }
 
 body.page-dashboard-admin .dashboard-content .card:nth-of-type(odd) {
