@@ -1,0 +1,164 @@
+<%- include('../partials/layout-top', { title, user, activeSection }) %>
+
+<%
+  const assignedStudents = data.students || [];
+  const pendingLeaves = data.pendingLeaves || [];
+  const feedbackStudents = data.feedbackStudents || [];
+  const analytics = data.analytics || [];
+  const lowCgpaStudents = assignedStudents
+    .filter((student) => Number(student.cgpa_overall || 0) < 7.5)
+    .sort((a, b) => Number(a.cgpa_overall || 0) - Number(b.cgpa_overall || 0));
+  const studentsWithoutFeedback = feedbackStudents
+    .filter((student) => Number(student.feedback_count || 0) === 0)
+    .sort((a, b) => Number(a.semester || 0) - Number(b.semester || 0));
+  const studentsWithPendingLeaves = assignedStudents
+    .map((student) => {
+      const studentPendingLeaves = pendingLeaves.filter((leave) => Number(leave.student_id) === Number(student.student_id));
+      return {
+        ...student,
+        pendingLeaves: studentPendingLeaves
+      };
+    })
+    .filter((student) => student.pendingLeaves.length > 0)
+    .sort((a, b) => b.pendingLeaves.length - a.pendingLeaves.length);
+  const criticalStudents = assignedStudents
+    .map((student) => {
+      const feedbackRow = feedbackStudents.find((item) => Number(item.student_id) === Number(student.student_id));
+      const pendingCount = pendingLeaves.filter((leave) => Number(leave.student_id) === Number(student.student_id)).length;
+      const needsFeedback = !feedbackRow || Number(feedbackRow.feedback_count || 0) === 0;
+      const riskScore = (Number(student.cgpa_overall || 0) < 7.5 ? 2 : 0) + (pendingCount > 0 ? 2 : 0) + (needsFeedback ? 1 : 0);
+
+      return {
+        ...student,
+        pendingCount,
+        needsFeedback,
+        riskScore
+      };
+    })
+    .filter((student) => student.riskScore > 0)
+    .sort((a, b) => b.riskScore - a.riskScore || Number(a.cgpa_overall || 0) - Number(b.cgpa_overall || 0))
+    .slice(0, 8);
+  const strongestSemester = analytics.length
+    ? analytics.reduce((best, row) => (Number(row.avg_cgpa || 0) > Number(best.avg_cgpa || 0) ? row : best), analytics[0])
+    : null;
+  const weakestSemester = analytics.length
+    ? analytics.reduce((low, row) => (Number(row.avg_cgpa || 0) < Number(low.avg_cgpa || 0) ? row : low), analytics[0])
+    : null;
+%>
+
+<section class="header-row"><h1>Faculty Monitor</h1></section>
+
+<section class="grid cards-4">
+  <div class="card"><h3>Priority Students</h3><p><%= criticalStudents.length %></p></div>
+  <div class="card"><h3>Low CGPA Cases</h3><p><%= lowCgpaStudents.length %></p></div>
+  <div class="card"><h3>Pending Leave Reviews</h3><p><%= pendingLeaves.length %></p></div>
+  <div class="card"><h3>Students Awaiting Feedback</h3><p><%= studentsWithoutFeedback.length %></p></div>
+</section>
+
+<section class="grid cards-2">
+  <section class="card faculty-monitor-card">
+    <h3>Priority Follow-Up Queue</h3>
+    <div class="faculty-monitor-list">
+      <% criticalStudents.forEach((student) => { %>
+        <article class="faculty-monitor-item">
+          <div>
+            <strong><%= student.name %></strong>
+            <p>ID <%= student.student_id %> - Sem <%= student.semester %> - CGPA <%= Number(student.cgpa_overall || 0).toFixed(2) %></p>
+            <p>
+              <%= student.pendingCount > 0 ? `${student.pendingCount} pending leave request(s). ` : '' %>
+              <%= student.needsFeedback ? 'Feedback not sent yet.' : 'Feedback already available.' %>
+            </p>
+          </div>
+          <a class="btn" href="/faculty/students/<%= student.student_id %>">Review Student</a>
+        </article>
+      <% }) %>
+      <% if (!criticalStudents.length) { %>
+        <p class="faculty-monitor-empty">No urgent student follow-ups right now.</p>
+      <% } %>
+    </div>
+  </section>
+
+  <section class="card faculty-monitor-card">
+    <h3>Pending Leave Review Queue</h3>
+    <div class="faculty-monitor-list">
+      <% pendingLeaves.slice(0, 8).forEach((leave) => { %>
+        <article class="faculty-monitor-item faculty-monitor-item-compact">
+          <div>
+            <strong><%= leave.student_name %></strong>
+            <p><%= leave.reason %></p>
+            <p><%= new Date(leave.from_date).toLocaleDateString() %> to <%= new Date(leave.to_date).toLocaleDateString() %></p>
+          </div>
+          <a class="btn" href="/faculty/leaves">Open Leaves</a>
+        </article>
+      <% }) %>
+      <% if (!pendingLeaves.length) { %>
+        <p class="faculty-monitor-empty">No pending leaves to review.</p>
+      <% } %>
+    </div>
+  </section>
+</section>
+
+<section class="grid cards-2">
+  <section class="card faculty-monitor-card">
+    <h3>Students Waiting For First Feedback</h3>
+    <div class="faculty-monitor-list">
+      <% studentsWithoutFeedback.slice(0, 8).forEach((student) => { %>
+        <article class="faculty-monitor-item faculty-monitor-item-compact">
+          <div>
+            <strong><%= student.student_name %></strong>
+            <p><%= student.department %> - Sem <%= student.semester %></p>
+            <p>No feedback note has been sent yet.</p>
+          </div>
+          <a class="btn" href="/faculty/students/<%= student.student_id %>">Send Feedback</a>
+        </article>
+      <% }) %>
+      <% if (!studentsWithoutFeedback.length) { %>
+        <p class="faculty-monitor-empty">All assigned students already have feedback records.</p>
+      <% } %>
+    </div>
+  </section>
+
+  <section class="card faculty-monitor-card">
+    <h3>Low CGPA Watchlist</h3>
+    <div class="faculty-monitor-list">
+      <% lowCgpaStudents.slice(0, 8).forEach((student) => { %>
+        <article class="faculty-monitor-item faculty-monitor-item-compact">
+          <div>
+            <strong><%= student.name %></strong>
+            <p><%= student.department %> - Sem <%= student.semester %></p>
+            <p>CGPA <%= Number(student.cgpa_overall || 0).toFixed(2) %></p>
+          </div>
+          <a class="btn" href="/faculty/students/<%= student.student_id %>">Open Profile</a>
+        </article>
+      <% }) %>
+      <% if (!lowCgpaStudents.length) { %>
+        <p class="faculty-monitor-empty">No low-CGPA students in the current watchlist.</p>
+      <% } %>
+    </div>
+  </section>
+</section>
+
+<section class="grid cards-2">
+  <div class="card">
+    <h3>Strongest Semester</h3>
+    <% if (strongestSemester) { %>
+      <p>Semester <%= strongestSemester.semester %></p>
+      <p>Average CGPA: <strong><%= Number(strongestSemester.avg_cgpa || 0).toFixed(2) %></strong></p>
+      <p>Average Attendance: <strong><%= Number(strongestSemester.avg_attendance || 0).toFixed(2) %>%</strong></p>
+    <% } else { %>
+      <p>No semester analytics available yet.</p>
+    <% } %>
+  </div>
+  <div class="card">
+    <h3>Weakest Semester</h3>
+    <% if (weakestSemester) { %>
+      <p>Semester <%= weakestSemester.semester %></p>
+      <p>Average CGPA: <strong><%= Number(weakestSemester.avg_cgpa || 0).toFixed(2) %></strong></p>
+      <p>Average Attendance: <strong><%= Number(weakestSemester.avg_attendance || 0).toFixed(2) %>%</strong></p>
+    <% } else { %>
+      <p>No semester analytics available yet.</p>
+    <% } %>
+  </div>
+</section>
+
+<%- include('../partials/layout-bottom') %>

@@ -70,7 +70,32 @@ const getFacultyDashboard = async (facultyId) => {
     [facultyId]
   );
 
-  return { students, pendingLeaves, allLeaveRequests, leaveStudents, studentsNoLeaves, analytics };
+  const [recentFeedback] = await db.execute(
+    `SELECT sf.id, sf.subject, sf.message, sf.created_at,
+            s.id AS student_id, u.name AS student_name, s.semester, s.department
+     FROM student_feedback sf
+     JOIN students s ON s.id = sf.student_id
+     JOIN users u ON u.id = s.user_id
+     WHERE sf.faculty_id = ?
+     ORDER BY sf.created_at DESC, sf.id DESC
+     LIMIT 12`,
+    [facultyId]
+  );
+
+  const [feedbackStudents] = await db.execute(
+    `SELECT s.id AS student_id, u.name AS student_name, s.semester, s.department,
+            COUNT(sf.id) AS feedback_count,
+            MAX(sf.created_at) AS latest_feedback_at
+     FROM students s
+     JOIN users u ON u.id = s.user_id
+     LEFT JOIN student_feedback sf ON sf.student_id = s.id AND sf.faculty_id = ?
+     WHERE s.faculty_id = ?
+     GROUP BY s.id, u.name, s.semester, s.department
+     ORDER BY latest_feedback_at DESC NULLS LAST, u.name`,
+    [facultyId, facultyId]
+  );
+
+  return { students, pendingLeaves, allLeaveRequests, leaveStudents, studentsNoLeaves, analytics, recentFeedback, feedbackStudents };
 };
 
 const getFacultyMarksEntries = async (facultyId) => {

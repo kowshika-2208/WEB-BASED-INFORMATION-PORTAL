@@ -3,6 +3,7 @@
 <%
   const profile = data.profile || {};
   const marks = data.marks || [];
+  const subjectAttendance = data.subjectAttendance || [];
   const feedback = data.feedback || [];
   const latestFeedback = feedback[0] || null;
   const currentSemesterMarks = marks.filter((m) => Number(m.semester) === Number(profile.semester));
@@ -10,20 +11,29 @@
   const rollNo = `21CSE${String(profile.student_id || 0).padStart(3, '0')}`;
   const year = Math.max(1, Math.ceil(Number(profile.semester || 1) / 2));
   const semesterLabel = `${year}${year === 1 ? 'st' : year === 2 ? 'nd' : year === 3 ? 'rd' : 'th'} Year / ${profile.semester || 1}${Number(profile.semester || 1) === 1 ? 'st' : Number(profile.semester || 1) === 2 ? 'nd' : Number(profile.semester || 1) === 3 ? 'rd' : 'th'} Semester`;
+  const currentSemesterNumber = Number(profile.semester || 1);
 
-  const uniqueBySubject = new Map();
-  markRows.forEach((row) => {
-    const total = Number(row.internal_marks || 0) + Number(row.external_marks || 0);
-    const pct = Math.min(100, Math.round((total / 120) * 100));
-    uniqueBySubject.set(row.subject, pct);
-  });
-  const attendanceCards = Array.from(uniqueBySubject.entries());
+  const attendanceCards = subjectAttendance.length
+    ? subjectAttendance
+    : markRows.map((row) => {
+        const total = Number(row.internal_marks || 0) + Number(row.external_marks || 0);
+        return {
+          semester: Number(row.semester),
+          subject: row.subject,
+          attendance_percentage: Math.min(100, Math.round((total / 120) * 100))
+        };
+      });
+  const minimalAttendanceCards = attendanceCards
+    .filter((row) => Number(row.semester) === currentSemesterNumber)
+    .slice(0, 4);
+  const visibleAttendanceCards = minimalAttendanceCards.length ? minimalAttendanceCards : attendanceCards.slice(0, 4);
   const semesterCgpaRows = (data.semesterCgpa || []).slice().sort((a, b) => Number(a.semester) - Number(b.semester));
   const semesterCgpaMap = new Map(semesterCgpaRows.map((r) => [Number(r.semester), Number(r.cgpa)]));
-  const currentSemesterNumber = Number(profile.semester || 1);
+  const highestMarkedSemester = marks.length ? Math.max(...marks.map((row) => Number(row.semester || 0))) : currentSemesterNumber;
+  const resultSemesterCount = Math.max(5, currentSemesterNumber, highestMarkedSemester);
   const knownCgpas = semesterCgpaRows.map((r) => Number(r.cgpa || 0)).filter((v) => Number.isFinite(v) && v > 0);
   let lastCgpa = knownCgpas.length ? knownCgpas[0] : Number(profile.cgpa_overall || 0);
-  const fullSemesterCgpaRows = Array.from({ length: currentSemesterNumber }, (_, idx) => {
+  const fullSemesterCgpaRows = Array.from({ length: resultSemesterCount }, (_, idx) => {
     const semester = idx + 1;
     if (semesterCgpaMap.has(semester)) {
       lastCgpa = Number(semesterCgpaMap.get(semester) || 0);
@@ -49,7 +59,7 @@
   const carryOverArrears = enrichedMarks.filter(
     (row) => Number(row.semester) < currentSemesterNumber && !row.isPassed
   );
-  const semesterArrearHistory = Array.from({ length: currentSemesterNumber }, (_, idx) => {
+  const semesterArrearHistory = Array.from({ length: resultSemesterCount }, (_, idx) => {
     const semester = idx + 1;
     const rows = enrichedMarks.filter((row) => Number(row.semester) === semester);
     const arrears = rows.filter((row) => !row.isPassed);
@@ -59,6 +69,13 @@
       cleared: rows.filter((row) => row.isPassed).length,
       arrears: arrears.length,
       status: arrears.length ? 'Has Arrears' : 'Clear'
+    };
+  });
+  const semesterResults = Array.from({ length: resultSemesterCount }, (_, idx) => {
+    const semester = idx + 1;
+    return {
+      semester,
+      rows: enrichedMarks.filter((row) => Number(row.semester) === semester)
     };
   });
   const attemptedSubjects = enrichedMarks.length;
@@ -107,9 +124,58 @@
         <div class="info-row"><span>Mother Name:</span><strong><%= profile.mother_name || 'N/A' %></strong></div>
       </div>
     </div>
+    <div class="student-card">
+      <h3>Quick Actions</h3>
+      <p>Open the hall ticket section or download the PDF directly from here.</p>
+      <a class="btn" href="/student/dashboard#hall-ticket">Open Hall Ticket</a>
+      <% if (profile.hall_ticket_available) { %>
+        <a class="btn" style="margin-left:8px;" href="/student/hall-ticket/download">Download Hall Ticket PDF</a>
+      <% } %>
+    </div>
 
     <div class="student-card table-card">
-      <h3>Feedback From Faculty</h3>
+      <h3>Recent Faculty Guidance</h3>
+      <table class="student-data-table">
+        <thead>
+          <tr>
+            <th>Subject</th>
+            <th>Message</th>
+            <th>Faculty</th>
+            <th>Shared On</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% feedback.forEach((item) => { %>
+            <tr>
+              <td><strong><%= item.subject %></strong></td>
+              <td><%= item.message %></td>
+              <td><%= item.faculty_name || 'Faculty' %></td>
+              <td><%= new Date(item.created_at).toLocaleString() %></td>
+            </tr>
+          <% }) %>
+          <% if (!feedback.length) { %>
+            <tr><td colspan="4">No faculty feedback available yet.</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </article>
+
+  <article id="feedback" class="student-panel">
+    <% if (latestFeedback) { %>
+      <div class="student-card feedback-alert-card">
+        <div class="feedback-alert-head">
+          <h3>Latest Faculty Feedback</h3>
+          <span><%= latestFeedback.faculty_name || 'Faculty' %></span>
+        </div>
+        <p><strong><%= latestFeedback.subject %></strong></p>
+        <p><%= latestFeedback.message %></p>
+        <p>Shared on <%= new Date(latestFeedback.created_at).toLocaleString() %></p>
+      </div>
+    <% } %>
+
+    <div class="student-card table-card">
+      <h3>Faculty Feedback History</h3>
       <table class="student-data-table">
         <thead>
           <tr>
@@ -138,17 +204,17 @@
 
   <article id="attendance" class="student-panel">
     <div class="attendance-grid">
-      <% if (!attendanceCards.length) { %>
+      <% if (!visibleAttendanceCards.length) { %>
         <div class="student-card"><p>No attendance breakdown found.</p></div>
       <% } %>
-      <% attendanceCards.forEach(([subject, pct]) => { %>
-        <div class="student-card attendance-card">
+      <% visibleAttendanceCards.forEach((row) => { %>
+        <div class="student-card attendance-card attendance-card-compact">
           <div class="attendance-head">
-            <h3><%= subject %></h3>
-            <span><%= pct %>%</span>
+            <h3>Sem <%= row.semester %> - <%= row.subject %></h3>
+            <span><%= Number(row.attendance_percentage || 0).toFixed(2) %>%</span>
           </div>
           <div class="progress-track">
-            <div class="progress-fill" style="width: <%= pct %>%;"></div>
+            <div class="progress-fill" style="width: <%= Number(row.attendance_percentage || 0) %>%;"></div>
           </div>
         </div>
       <% }) %>
@@ -330,6 +396,45 @@
         </tbody>
       </table>
     </div>
+
+    <div class="student-card table-card">
+      <h3>Semester 1 to Semester <%= resultSemesterCount %> Results</h3>
+      <table class="student-data-table">
+        <thead>
+          <tr>
+            <th>Semester</th>
+            <th>Subject</th>
+            <th>Internal</th>
+            <th>External</th>
+            <th>Total</th>
+            <th>Grade</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% semesterResults.forEach((semesterBlock) => { %>
+            <% if (semesterBlock.rows.length) { %>
+              <% semesterBlock.rows.forEach((row) => { %>
+                <tr>
+                  <td>Sem <%= semesterBlock.semester %></td>
+                  <td><strong><%= row.subject %></strong></td>
+                  <td><%= row.internal_marks %></td>
+                  <td><%= row.external_marks %></td>
+                  <td><%= row.total %></td>
+                  <td><strong><%= getGrade(row.total) %></strong></td>
+                  <td><strong><%= row.isPassed ? 'Pass' : 'Arrear' %></strong></td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td>Sem <%= semesterBlock.semester %></td>
+                <td colspan="6">No result published for this semester yet.</td>
+              </tr>
+            <% } %>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
   </article>
 
   <article id="leave" class="student-panel">
@@ -468,7 +573,7 @@
       <div class="card">
         <h3>Actions</h3>
         <% if (profile.hall_ticket_available) { %>
-          <p>Your hall ticket is ready. You can view or download it.</p>
+          <p>Your hall ticket is ready. You can view or download it now.</p>
           <a class="btn" href="/student/hall-ticket">View Hall Ticket</a>
           <a class="btn" style="margin-left:8px;" href="/student/hall-ticket/download">Download PDF</a>
         <% } else { %>
@@ -481,24 +586,59 @@
 
   <article id="timetable" class="student-panel">
     <div class="student-card table-card">
-      <h2>Weekly Timetable</h2>
+      <h2>Upcoming Exam Timetable</h2>
       <table class="student-data-table">
         <thead>
           <tr>
+            <th>Date</th>
             <th>Day</th>
-            <th>9:00</th>
-            <th>10:00</th>
-            <th>11:00</th>
-            <th>12:00</th>
-            <th>2:00</th>
+            <th>Session</th>
+            <th>Subject</th>
+            <th>Time</th>
+            <th>Venue</th>
           </tr>
         </thead>
         <tbody>
-          <tr><td><strong>Monday</strong></td><td>Math</td><td>DSA</td><td>-</td><td>Physics</td><td>English</td></tr>
-          <tr><td><strong>Tuesday</strong></td><td>DSA Lab</td><td>DSA Lab</td><td>-</td><td>Math</td><td>Digital</td></tr>
-          <tr><td><strong>Wednesday</strong></td><td>English</td><td>Physics</td><td>-</td><td>Digital Lab</td><td>Digital Lab</td></tr>
-          <tr><td><strong>Thursday</strong></td><td>Math</td><td>English</td><td>-</td><td>DSA</td><td>Physics</td></tr>
-          <tr><td><strong>Friday</strong></td><td>Physics Lab</td><td>Physics Lab</td><td>-</td><td>Math</td><td>DSA</td></tr>
+          <tr>
+            <td>22 Apr 2026</td>
+            <td><strong>Wednesday</strong></td>
+            <td>FN</td>
+            <td>Software Engineering</td>
+            <td>09:30 AM - 12:30 PM</td>
+            <td>Main Block, Hall A1</td>
+          </tr>
+          <tr>
+            <td>24 Apr 2026</td>
+            <td><strong>Friday</strong></td>
+            <td>FN</td>
+            <td>Web Technology</td>
+            <td>09:30 AM - 12:30 PM</td>
+            <td>Main Block, Hall A1</td>
+          </tr>
+          <tr>
+            <td>27 Apr 2026</td>
+            <td><strong>Monday</strong></td>
+            <td>AN</td>
+            <td>Theory of Computation</td>
+            <td>01:30 PM - 04:30 PM</td>
+            <td>Exam Centre, Room 204</td>
+          </tr>
+          <tr>
+            <td>29 Apr 2026</td>
+            <td><strong>Wednesday</strong></td>
+            <td>FN</td>
+            <td>Data Analytics</td>
+            <td>09:30 AM - 12:30 PM</td>
+            <td>Exam Centre, Room 204</td>
+          </tr>
+          <tr>
+            <td>02 May 2026</td>
+            <td><strong>Saturday</strong></td>
+            <td>AN</td>
+            <td>Computer Architecture</td>
+            <td>01:30 PM - 04:30 PM</td>
+            <td>Central Hall, Block C</td>
+          </tr>
         </tbody>
       </table>
     </div>

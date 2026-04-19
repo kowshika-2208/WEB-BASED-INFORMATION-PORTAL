@@ -18,9 +18,15 @@ const lastNames = [
   'Kumar', 'Desai', 'Yadav', 'Thakur', 'Dubey', 'Shetty', 'Tripathi', 'Bansal', 'Bhatt', 'Arora',
   'Ghosh', 'Tiwari', 'Shukla', 'Kadam', 'Rawat', 'Bajaj', 'Bedi', 'Soni', 'Purohit', 'Mehta'
 ];
-const semesterCycle = [3, 4, 5, 6];
-const subjectsPrev = ['Mathematics', 'Data Structures', 'Communication Skills'];
-const subjectsCurrent = ['Database Systems', 'Operating Systems', 'Software Engineering'];
+const semesterCycle = [5, 4, 5, 6];
+const semesterSubjects = {
+  1: ['Mathematics I', 'Physics', 'Programming in C', 'Engineering Graphics', 'English Communication'],
+  2: ['Mathematics II', 'Chemistry', 'Python Programming', 'Basic Electronics', 'Environmental Science'],
+  3: ['Data Structures', 'Digital Logic', 'Object Oriented Programming', 'Discrete Mathematics', 'Database Basics'],
+  4: ['Database Systems', 'Operating Systems', 'Computer Networks', 'Java Programming', 'Probability and Statistics'],
+  5: ['Software Engineering', 'Web Technology', 'Theory of Computation', 'Data Analytics', 'Computer Architecture'],
+  6: ['Machine Learning', 'Compiler Design', 'Cloud Computing', 'Mobile Application Development', 'DevOps Fundamentals']
+};
 const leaveReasons = ['Medical leave', 'Family function', 'University event', 'Travel delay', 'Personal emergency'];
 
 const facultyList = createFacultyList();
@@ -39,38 +45,47 @@ const students = Array.from({ length: 50 }, (_, index) => {
     mother_name: `${lastName} Devi`,
     contact: `+91 90000 ${String(index + 1).padStart(5, '0')}`,
     cgpa_overall: +(7.1 + ((index * 0.17) % 2.6)).toFixed(2),
-    hall_ticket_available: index % 4 === 0 ? 0 : 1,
+    hall_ticket_available: 1,
     faculty_name: 'Dr. Maya Rao'
   };
 });
 
-const allMarks = students.flatMap((student, index) => {
-  const semPrev = student.semester > 1 ? student.semester - 1 : student.semester;
-  return [
-    { student_id: student.student_id, semester: semPrev, subject: subjectsPrev[0], internal_marks: 25 + (index % 11), external_marks: 38 + (index % 22) },
-    { student_id: student.student_id, semester: semPrev, subject: subjectsPrev[1], internal_marks: 26 + (index % 10), external_marks: 39 + (index % 20) },
-    { student_id: student.student_id, semester: semPrev, subject: subjectsPrev[2], internal_marks: 27 + (index % 9), external_marks: 40 + (index % 18) },
-    { student_id: student.student_id, semester: student.semester, subject: subjectsCurrent[0], internal_marks: 28 + (index % 10), external_marks: 41 + (index % 17) },
-    { student_id: student.student_id, semester: student.semester, subject: subjectsCurrent[1], internal_marks: 29 + (index % 8), external_marks: 42 + (index % 16) },
-    { student_id: student.student_id, semester: student.semester, subject: subjectsCurrent[2], internal_marks: 30 + (index % 7), external_marks: 43 + (index % 15) }
-  ];
-});
+const allMarks = students.flatMap((student, index) =>
+  Array.from({ length: Math.max(1, Number(student.semester || 1)) }, (_, semesterIndex) => {
+    const semester = semesterIndex + 1;
+    const subjects = semesterSubjects[semester] || semesterSubjects[5];
 
-const allAttendance = students.flatMap((student, index) => {
-  const semPrev = student.semester > 1 ? student.semester - 1 : student.semester;
-  return [
-    { student_id: student.student_id, semester: semPrev, attendance_percentage: Math.min(98, 76 + (index % 18)) },
-    { student_id: student.student_id, semester: student.semester, attendance_percentage: Math.min(99, 81 + (index % 17)) }
-  ];
-});
+    return subjects.map((subject, subjectIndex) => {
+      const internalBase = 24 + ((index + semester + subjectIndex) % 12);
+      const externalBase = 34 + ((index * 3 + semester * 5 + subjectIndex * 4) % 24);
 
-const allFees = students.flatMap((student, index) => {
-  const semPrev = student.semester > 1 ? student.semester - 1 : student.semester;
-  return [
-    { student_id: student.student_id, semester: semPrev, amount: 2400 + (index * 35), status: 'Paid' },
-    { student_id: student.student_id, semester: student.semester, amount: 2600 + (index * 35), status: index % 5 === 0 ? 'Pending' : 'Paid' }
-  ];
-});
+      return {
+        student_id: student.student_id,
+        semester,
+        subject,
+        internal_marks: internalBase,
+        external_marks: externalBase
+      };
+    });
+  }).flat()
+);
+
+const allAttendance = students.flatMap((student, index) =>
+  Array.from({ length: Math.max(1, Number(student.semester || 1)) }, (_, semesterIndex) => ({
+    student_id: student.student_id,
+    semester: semesterIndex + 1,
+    attendance_percentage: Math.min(98, 78 + ((index + semesterIndex * 3) % 18))
+  }))
+);
+
+const allFees = students.flatMap((student, index) =>
+  Array.from({ length: Math.max(1, Number(student.semester || 1)) }, (_, semesterIndex) => ({
+    student_id: student.student_id,
+    semester: semesterIndex + 1,
+    amount: 2400 + (semesterIndex * 180) + (index * 35),
+    status: semesterIndex + 1 === Number(student.semester) && index % 5 === 0 ? 'Pending' : 'Paid'
+  }))
+);
 
 const allLeaves = students.flatMap((student, index) => [
   {
@@ -125,17 +140,46 @@ const isDbUnavailable = (error) => {
     'ER_ACCESS_DENIED_ERROR',
     'ER_BAD_DB_ERROR',
     'PROTOCOL_CONNECTION_LOST',
+    'ENOTFOUND',
+    'ETIMEDOUT',
+    'ECONNRESET',
+    '57P01',
     '3D000',
     '28P01',
-    'ECONNRESET'
+    '08001',
+    '42P01',
+    '42703'
   ]);
-  return Boolean(error && (dbCodes.has(error.code) || /postgres|database/i.test(String(error.message || ''))));
+  const message = String(error && error.message ? error.message : '');
+
+  return Boolean(
+    error && (
+      dbCodes.has(error.code) ||
+      /postgres|database|connection|password authentication failed|received invalid response|no pg_hba\.conf entry|relation .* does not exist|column .* does not exist/i.test(message)
+    )
+  );
 };
 
 const findFallbackUserByCredentials = (email, password) =>
   demoUsers.find(
     (user) => String(user.email).toLowerCase() === String(email).toLowerCase() && user.password === password
   ) || null;
+
+const buildSubjectAttendance = (marks, attendance) => {
+  const attendanceMap = new Map(
+    attendance.map((row) => [Number(row.semester), Number(row.attendance_percentage || 0)])
+  );
+
+  return marks.map((mark, index) => {
+    const base = attendanceMap.get(Number(mark.semester)) || 0;
+    const adjustment = ((index % 5) - 2) * 1.4;
+    return {
+      semester: Number(mark.semester),
+      subject: mark.subject,
+      attendance_percentage: Math.max(65, Math.min(99, +(base + adjustment).toFixed(2)))
+    };
+  });
+};
 
 const getFallbackStudentDashboard = (email) => {
   const profile = students.find((student) => student.email.toLowerCase() === String(email || '').toLowerCase()) || students[0];
@@ -145,6 +189,7 @@ const getFallbackStudentDashboard = (email) => {
   const leaves = allLeaves.filter((leave) => leave.student_id === profile.student_id);
   const queries = allQueries.filter((query) => query.student_id === profile.student_id);
   const feedback = allFeedback.filter((item) => item.student_id === profile.student_id);
+  const subjectAttendance = buildSubjectAttendance(studentMarks, attendance);
 
   const semesterMap = new Map();
   studentMarks.forEach((mark) => {
@@ -159,7 +204,7 @@ const getFallbackStudentDashboard = (email) => {
     return { semester, cgpa: +avg.toFixed(2) };
   });
 
-  return { profile, attendance, marks: studentMarks, fees, leaves, queries, feedback, semesterCgpa };
+  return { profile, attendance, subjectAttendance, marks: studentMarks, fees, leaves, queries, feedback, semesterCgpa };
 };
 
 const getFallbackFacultyData = () => {
@@ -220,7 +265,42 @@ const getFallbackFacultyData = () => {
       avg_attendance: +(values.attendance.reduce((a, b) => a + b, 0) / values.attendance.length).toFixed(2)
     }));
 
-  return { students: facultyStudents, pendingLeaves, allLeaveRequests, leaveStudents, studentsNoLeaves, analytics };
+  const recentFeedback = allFeedback
+    .map((item) => {
+      const student = students.find((row) => Number(row.student_id) === Number(item.student_id));
+      if (!student) return null;
+      return {
+        ...item,
+        student_id: student.student_id,
+        student_name: student.name,
+        semester: student.semester,
+        department: student.department
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    .slice(0, 12);
+
+  const feedbackStudents = facultyStudents
+    .map((student) => {
+      const studentFeedback = allFeedback.filter((item) => Number(item.student_id) === Number(student.student_id));
+      return {
+        student_id: student.student_id,
+        student_name: student.name,
+        semester: student.semester,
+        department: student.department,
+        feedback_count: studentFeedback.length,
+        latest_feedback_at: studentFeedback.length ? studentFeedback[0].created_at : null
+      };
+    })
+    .sort((a, b) => {
+      if (!a.latest_feedback_at && !b.latest_feedback_at) return String(a.student_name).localeCompare(String(b.student_name));
+      if (!a.latest_feedback_at) return 1;
+      if (!b.latest_feedback_at) return -1;
+      return new Date(b.latest_feedback_at) - new Date(a.latest_feedback_at);
+    });
+
+  return { students: facultyStudents, pendingLeaves, allLeaveRequests, leaveStudents, studentsNoLeaves, analytics, recentFeedback, feedbackStudents };
 };
 
 const getFallbackFacultyMarksEntries = () =>

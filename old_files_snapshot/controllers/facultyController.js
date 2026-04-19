@@ -19,6 +19,148 @@ const {
   submitFallbackFacultyFeedback
 } = require('../utils/fallbackData');
 
+const getBatchLabelFromSemester = (semester) => {
+  const currentYear = new Date().getFullYear();
+  const startYear = currentYear - Math.floor((Number(semester || 1) - 1) / 2);
+  return `${startYear}-${startYear + 4}`;
+};
+
+const getResidenceType = (studentId) => (Number(studentId) % 3 === 0 ? 'Hosteller' : 'Day Scholar');
+
+const getPlacementProjection = (student, rankInBatch) => {
+  const companyPool = ['Google', 'Microsoft', 'Amazon', 'Cisco', 'Zoho', 'Infosys', 'TCS', 'Deloitte'];
+  const semester = Number(student.semester || 1);
+  const cgpa = Number(student.cgpa_overall || 0);
+  const isPlaced = semester >= 5 && (cgpa >= 8.2 || rankInBatch <= 3);
+
+  if (!isPlaced) {
+    return {
+      status: semester >= 5 ? 'Placement Training' : 'Placement Pipeline',
+      company: '-',
+      packageLpa: null
+    };
+  }
+
+  const company = companyPool[(Number(student.student_id) + rankInBatch) % companyPool.length];
+  const packageLpa = +(6 + (cgpa - 7) * 3 + Math.max(0, 4 - rankInBatch) * 1.2).toFixed(1);
+
+  return {
+    status: 'Placed',
+    company,
+    packageLpa
+  };
+};
+
+const buildBatchDashboardData = (students = [], marksEntries = []) => {
+  const studentMarksMap = new Map();
+  marksEntries.forEach((row) => {
+    const key = Number(row.student_id);
+    if (!studentMarksMap.has(key)) studentMarksMap.set(key, []);
+    studentMarksMap.get(key).push(row);
+  });
+
+  const batchMap = new Map();
+
+  students.forEach((student) => {
+    const batch = getBatchLabelFromSemester(student.semester);
+    const marks = studentMarksMap.get(Number(student.student_id)) || [];
+    const arrearCount = marks.filter((row) => (Number(row.internal_marks || 0) + Number(row.external_marks || 0)) < 48).length;
+    const noHistoryOfArrear = arrearCount === 0;
+
+    if (!batchMap.has(batch)) batchMap.set(batch, []);
+    batchMap.get(batch).push({
+      ...student,
+      batch,
+      residenceType: getResidenceType(student.student_id),
+      arrearCount,
+      noHistoryOfArrear
+    });
+  });
+
+  const batchDetails = Array.from(batchMap.entries())
+    .sort((a, b) => String(b[0]).localeCompare(String(a[0])))
+    .map(([batch, rows]) => {
+      const rankedStudents = rows
+        .slice()
+        .sort((a, b) => Number(b.cgpa_overall || 0) - Number(a.cgpa_overall || 0) || String(a.name).localeCompare(String(b.name)))
+        .map((student, index) => {
+          const placement = getPlacementProjection(student, index + 1);
+          return {
+            ...student,
+            batchRank: index + 1,
+            placementStatus: placement.status,
+            company: placement.company,
+            packageLpa: placement.packageLpa
+          };
+        });
+
+      const departmentBreakdown = Array.from(
+        rankedStudents.reduce((map, student) => {
+          if (!map.has(student.department)) {
+            map.set(student.department, {
+              department: student.department,
+              totalStudents: 0,
+              placedCount: 0,
+              totalCgpa: 0,
+              arrearCount: 0,
+              hostellers: 0,
+              dayScholars: 0
+            });
+          }
+
+          const row = map.get(student.department);
+          row.totalStudents += 1;
+          row.totalCgpa += Number(student.cgpa_overall || 0);
+          row.arrearCount += Number(student.arrearCount || 0);
+          if (student.placementStatus === 'Placed') row.placedCount += 1;
+          if (student.residenceType === 'Hosteller') row.hostellers += 1;
+          else row.dayScholars += 1;
+          return map;
+        }, new Map()).values()
+      ).map((row) => ({
+        ...row,
+        avgCgpa: +(row.totalCgpa / Math.max(1, row.totalStudents)).toFixed(2),
+        placementRate: +((row.placedCount * 100) / Math.max(1, row.totalStudents)).toFixed(1)
+      }));
+
+      const placedCount = rankedStudents.filter((student) => student.placementStatus === 'Placed').length;
+      const hostellers = rankedStudents.filter((student) => student.residenceType === 'Hosteller').length;
+      const dayScholars = rankedStudents.length - hostellers;
+      const arrearFreeCount = rankedStudents.filter((student) => student.noHistoryOfArrear).length;
+      const totalArrears = rankedStudents.reduce((sum, student) => sum + Number(student.arrearCount || 0), 0);
+
+      return {
+        batch,
+        totalStudents: rankedStudents.length,
+        placedCount,
+        placementRate: +((placedCount * 100) / Math.max(1, rankedStudents.length)).toFixed(1),
+        avgCgpa: +(rankedStudents.reduce((sum, student) => sum + Number(student.cgpa_overall || 0), 0) / Math.max(1, rankedStudents.length)).toFixed(2),
+        hostellers,
+        dayScholars,
+        arrearFreeCount,
+        totalArrears,
+        departmentBreakdown,
+        topRankedStudents: rankedStudents.slice(0, 5),
+        students: rankedStudents
+      };
+    });
+
+  const batchSummaries = batchDetails.map((batch) => ({
+    batch: batch.batch,
+    totalStudents: batch.totalStudents,
+    departments: batch.departmentBreakdown.length,
+    placedCount: batch.placedCount,
+    placementRate: batch.placementRate,
+    avgCgpa: batch.avgCgpa,
+    hostellers: batch.hostellers,
+    dayScholars: batch.dayScholars,
+    arrearFreeCount: batch.arrearFreeCount,
+    totalArrears: batch.totalArrears
+  }));
+
+  return { batchSummaries, batchDetails };
+};
+
 const loadFacultyData = async (req, res) => {
   let faculty;
   try {
@@ -71,8 +213,41 @@ const renderFacultyPage = async (req, res, next, view, title, activeSection) => 
 };
 
 const showDashboard = (req, res, next) => renderFacultyPage(req, res, next, 'faculty/dashboard', 'Faculty Dashboard', 'overview');
-const showMonitor = (req, res, next) => renderFacultyPage(req, res, next, 'faculty/dashboard', 'Faculty Monitor', 'monitor');
+const showMonitor = (req, res, next) => renderFacultyPage(req, res, next, 'faculty/monitor', 'Faculty Monitor', 'monitor');
 const showStudents = (req, res, next) => renderFacultyPage(req, res, next, 'faculty/students', 'Assigned Students', 'students');
+const showFeedback = (req, res, next) => renderFacultyPage(req, res, next, 'faculty/feedback', 'Faculty Feedback', 'feedback');
+const showBatches = async (req, res, next) => {
+  try {
+    const loaded = await loadFacultyData(req, res);
+    if (!loaded) return;
+
+    let marksEntries = [];
+    try {
+      marksEntries = await getFacultyMarksEntries(loaded.faculty.id);
+    } catch (error) {
+      if (isDbUnavailable(error)) {
+        marksEntries = getFallbackFacultyMarksEntries();
+      } else {
+        throw error;
+      }
+    }
+
+    const batchDashboard = buildBatchDashboardData(loaded.data.students || [], marksEntries);
+
+    return res.render('faculty/batches', {
+      title: 'Faculty Batches',
+      user: req.user,
+      data: {
+        ...loaded.data,
+        marksEntries,
+        ...batchDashboard
+      },
+      activeSection: 'batches'
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
 const showMarks = async (req, res, next) => {
   try {
     const loaded = await loadFacultyData(req, res);
@@ -309,6 +484,8 @@ module.exports = {
   showDashboard,
   showMonitor,
   showStudents,
+  showFeedback,
+  showBatches,
   showMarks,
   showAttendance,
   showLeaves,

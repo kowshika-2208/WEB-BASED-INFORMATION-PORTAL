@@ -2123,6 +2123,15 @@ th {
   color: #172540;
 }
 
+.attendance-card-compact {
+  padding: 12px;
+}
+
+.attendance-card-compact h3 {
+  font-size: 13px;
+  font-weight: 600;
+}
+
 .attendance-head {
   display: flex;
   justify-content: space-between;
@@ -2136,11 +2145,19 @@ th {
   font-size: 20px;
 }
 
+.attendance-card-compact .attendance-head span {
+  font-size: 13px;
+}
+
 .progress-track {
   width: 100%;
   height: 10px;
   border-radius: 999px;
   background: #dbe4ef;
+}
+
+.attendance-card-compact .progress-track {
+  height: 7px;
 }
 
 .progress-fill {

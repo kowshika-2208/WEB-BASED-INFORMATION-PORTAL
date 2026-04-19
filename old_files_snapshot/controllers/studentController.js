@@ -158,7 +158,17 @@ const submitQuery = async (req, res, next) => {
 
 const downloadHallTicket = async (req, res, next) => {
   try {
-    const dashboard = await getStudentDashboard(req.user.id);
+    let dashboard;
+    try {
+      dashboard = await getStudentDashboard(req.user.id);
+    } catch (error) {
+      if (isDbUnavailable(error)) {
+        dashboard = getFallbackStudentDashboard(req.user.email);
+      } else {
+        throw error;
+      }
+    }
+
     if (!dashboard) return res.redirect('/student/dashboard');
 
     if (!dashboard.profile.hall_ticket_available) {

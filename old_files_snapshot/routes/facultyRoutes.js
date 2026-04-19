@@ -4,6 +4,8 @@ const {
   showDashboard,
   showMonitor,
   showStudents,
+  showFeedback,
+  showBatches,
   showMarks,
   showAttendance,
   showLeaves,
@@ -24,6 +26,8 @@ router.use(requireAuth, requireRole('faculty'));
 router.get('/dashboard', showDashboard);
 router.get('/monitor', showMonitor);
 router.get('/students', showStudents);
+router.get('/batches', showBatches);
+router.get('/feedback', showFeedback);
 router.get('/students/:studentId', showStudentDetails);
 router.get('/marks', showMarks);
 router.get('/attendance', showAttendance);

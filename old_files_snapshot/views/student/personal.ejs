@@ -25,6 +25,22 @@
 
 <section class="header-row"><h1>Marks Details</h1></section>
 
+<%
+  const latestFeedback = (data.feedback || [])[0] || null;
+%>
+
+<% if (latestFeedback) { %>
+  <section class="card feedback-alert-card">
+    <div class="feedback-alert-head">
+      <h3>Latest Faculty Feedback Notification</h3>
+      <span><%= latestFeedback.faculty_name || 'Faculty' %></span>
+    </div>
+    <p><strong><%= latestFeedback.subject %></strong></p>
+    <p><%= latestFeedback.message %></p>
+    <p>Shared on <%= new Date(latestFeedback.created_at).toLocaleString() %></p>
+  </section>
+<% } %>
+
 <section class="grid cards-3">
   <div class="card">
     <h3>Total Subjects</h3>

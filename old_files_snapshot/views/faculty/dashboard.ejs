@@ -4,6 +4,8 @@
   const assignedStudents = data.students || [];
   const pendingLeaves = data.pendingLeaves || [];
   const analytics = data.analytics || [];
+  const recentFeedback = data.recentFeedback || [];
+  const feedbackStudents = data.feedbackStudents || [];
   const avgCgpa =
     assignedStudents.length > 0
       ? (assignedStudents.reduce((sum, student) => sum + Number(student.cgpa_overall || 0), 0) / assignedStudents.length).toFixed(2)
@@ -36,6 +38,12 @@
   <div class="card"><h3>Pending Leaves</h3><p><%= pendingLeaves.length %></p></div>
   <div class="card"><h3>Analytics Semesters</h3><p><%= analytics.length %></p></div>
   <div class="card"><h3>Average CGPA</h3><p><%= avgCgpa %></p></div>
+</section>
+
+<section class="grid cards-3">
+  <div class="card"><h3>Feedback Notes Sent</h3><p><%= recentFeedback.length %></p></div>
+  <div class="card"><h3>Students With Feedback</h3><p><%= feedbackStudents.filter(student => Number(student.feedback_count || 0) > 0).length %></p></div>
+  <div class="card"><h3>Students Awaiting Feedback</h3><p><%= feedbackStudents.filter(student => Number(student.feedback_count || 0) === 0).length %></p></div>
 </section>
 
 <section class="grid cards-2">
@@ -75,6 +83,28 @@
       <% } %>
     </div>
   </section>
+</section>
+
+<section class="card faculty-monitor-card">
+  <section class="header-row">
+    <h3>Recent Feedback Activity</h3>
+    <a class="btn" href="/faculty/feedback">Open Feedback Center</a>
+  </section>
+  <div class="faculty-monitor-list">
+    <% recentFeedback.slice(0, 5).forEach((item) => { %>
+      <article class="faculty-monitor-item faculty-monitor-item-compact">
+        <div>
+          <strong><%= item.student_name %></strong>
+          <p><%= item.subject %></p>
+          <p><%= item.message %></p>
+        </div>
+        <span class="faculty-status-pill"><%= new Date(item.created_at).toLocaleDateString() %></span>
+      </article>
+    <% }) %>
+    <% if (!recentFeedback.length) { %>
+      <p class="faculty-monitor-empty">No feedback activity yet. Open a student profile to send the first feedback note.</p>
+    <% } %>
+  </div>
 </section>
 
 <%- include('../partials/layout-bottom') %>

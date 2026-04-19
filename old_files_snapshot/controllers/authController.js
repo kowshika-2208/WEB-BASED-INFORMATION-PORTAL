@@ -243,6 +243,20 @@ const buildDepartmentProfile = (department, index) => {
 const getDepartmentProfiles = () => DEPARTMENT_BASE.map((department, index) => buildDepartmentProfile(department, index));
 const getDepartmentCatalog = () => getDepartmentProfiles().map(({ slug, name, short, detail, icon }) => ({ slug, name, short, detail, icon }));
 const findDepartmentBySlug = (slug) => getDepartmentProfiles().find((department) => department.slug === slug);
+const getJwtSecret = () => process.env.JWT_SECRET || '';
+
+const createSessionToken = (user) => {
+  const secret = getJwtSecret();
+  if (!secret) {
+    return null;
+  }
+
+  return jwt.sign(
+    { id: user.id, name: user.name, email: user.email, role: user.role },
+    secret,
+    { expiresIn: process.env.JWT_EXPIRES_IN || '1d' }
+  );
+};
 
 const showLogin = (req, res) => {
   if (req.user) return res.redirect('/');
@@ -738,16 +752,15 @@ const login = async (req, res, next) => {
           });
         }
 
-        const token = jwt.sign(
-          {
-            id: fallbackUser.id,
-            name: fallbackUser.name,
-            email: fallbackUser.email,
-            role: fallbackUser.role
-          },
-          process.env.JWT_SECRET,
-          { expiresIn: process.env.JWT_EXPIRES_IN || '1d' }
-        );
+        const token = createSessionToken(fallbackUser);
+        if (!token) {
+          return res.status(503).render('auth/login', {
+            title: 'Login',
+            error: 'Login is temporarily unavailable because the server auth secret is missing.',
+            home: getPublicHomeData(),
+            user: null
+          });
+        }
 
         res.cookie('token', token, {
           httpOnly: true,
@@ -782,11 +795,15 @@ const login = async (req, res, next) => {
       });
     }
 
-    const token = jwt.sign(
-      { id: user.id, name: user.name, email: user.email, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '1d' }
-    );
+    const token = createSessionToken(user);
+    if (!token) {
+      return res.status(503).render('auth/login', {
+        title: 'Login',
+        error: 'Login is temporarily unavailable because the server auth secret is missing.',
+        home: getPublicHomeData(),
+        user: null
+      });
+    }
 
     res.cookie('token', token, {
       httpOnly: true,
@@ -798,7 +815,15 @@ const login = async (req, res, next) => {
     if (user.role === 'faculty') return res.redirect('/faculty/dashboard');
     return res.redirect('/student/dashboard');
   } catch (error) {
-    return next(error);
+    console.error('Login Error:', error);
+    return res.status(isDbUnavailable(error) ? 503 : 500).render('auth/login', {
+      title: 'Login',
+      error: isDbUnavailable(error)
+        ? 'Login is temporarily unavailable while the database is being prepared. Please try again shortly.'
+        : 'Login failed due to a server issue. Please try again.',
+      home: getPublicHomeData(),
+      user: null
+    });
   }
 };
 
