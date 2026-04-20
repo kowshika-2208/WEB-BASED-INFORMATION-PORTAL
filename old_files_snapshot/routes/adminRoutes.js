@@ -3,6 +3,7 @@ const { body } = require('express-validator');
 const {
   showDashboard,
   showStudents,
+  showBatches,
   showFaculty,
   showOperations,
   showReports,
@@ -27,6 +28,7 @@ router.use(requireAuth, requireRole('admin'));
 
 router.get('/dashboard', showDashboard);
 router.get('/students', showStudents);
+router.get('/batches', showBatches);
 router.get('/faculty', showFaculty);
 router.get('/operations', showOperations);
 router.get('/reports', showReports);

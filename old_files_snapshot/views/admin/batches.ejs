@@ -1,0 +1,202 @@
+<%- include('../partials/layout-top', { title, user, activeSection }) %>
+
+<%
+  const batchSummaries = data.batchSummaries || [];
+  const batchDetails = data.batchDetails || [];
+  const firstBatch = batchDetails[0] ? batchDetails[0].batch : null;
+%>
+
+<section class="header-row"><h1>Batch Wise Student Overview</h1></section>
+
+<section class="card">
+  <h3>Batch List</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Batch</th>
+        <th>Total Students</th>
+        <th>Departments</th>
+        <th>Placed</th>
+        <th>Placement Rate</th>
+        <th>Average CGPA</th>
+        <th>Arrear Free</th>
+        <th>Open</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% batchSummaries.forEach((batch) => { %>
+        <tr>
+          <td><strong><%= batch.batch %></strong></td>
+          <td><%= batch.totalStudents %></td>
+          <td><%= batch.departments %></td>
+          <td><%= batch.placedCount %></td>
+          <td><%= batch.placementRate %>%</td>
+          <td><%= Number(batch.avgCgpa || 0).toFixed(2) %></td>
+          <td><%= batch.arrearFreeCount %></td>
+          <td><a class="btn" href="#batch-<%= batch.batch.replace(/[^0-9]/g, '') %>">View Batch</a></td>
+        </tr>
+      <% }) %>
+      <% if (!batchSummaries.length) { %>
+        <tr><td colspan="8">No batch data available.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</section>
+
+<section class="grid cards-4">
+  <div class="card"><h3>Total Batches</h3><p><%= batchSummaries.length %></p></div>
+  <div class="card"><h3>Total Students</h3><p><%= batchSummaries.reduce((sum, batch) => sum + Number(batch.totalStudents || 0), 0) %></p></div>
+  <div class="card"><h3>Placed Students</h3><p><%= batchSummaries.reduce((sum, batch) => sum + Number(batch.placedCount || 0), 0) %></p></div>
+  <div class="card"><h3>Total Arrears</h3><p><%= batchSummaries.reduce((sum, batch) => sum + Number(batch.totalArrears || 0), 0) %></p></div>
+</section>
+
+<section class="card">
+  <h3>Open A Batch</h3>
+  <div class="dashboard-tabs">
+    <% batchDetails.forEach((batch) => { %>
+      <a class="dashboard-tab" href="#batch-<%= batch.batch.replace(/[^0-9]/g, '') %>">
+        <span><%= batch.batch %></span>
+      </a>
+    <% }) %>
+  </div>
+</section>
+
+<% batchDetails.forEach((batch) => { %>
+  <section id="batch-<%= batch.batch.replace(/[^0-9]/g, '') %>" class="card">
+    <section class="header-row">
+      <h3>Batch <%= batch.batch %> Details</h3>
+      <% if (firstBatch && batch.batch !== firstBatch) { %>
+        <a class="btn" href="#batch-<%= firstBatch.replace(/[^0-9]/g, '') %>">Go To First Batch</a>
+      <% } %>
+    </section>
+
+    <section class="grid cards-4">
+      <div class="card"><h3>Total Students</h3><p><%= batch.totalStudents %></p></div>
+      <div class="card"><h3>Placement Rate</h3><p><%= batch.placementRate %>%</p></div>
+      <div class="card"><h3>Hosteller / Day Scholar</h3><p><%= batch.hostellers %> / <%= batch.dayScholars %></p></div>
+      <div class="card"><h3>Arrear Free</h3><p><%= batch.arrearFreeCount %></p></div>
+    </section>
+
+    <section class="card">
+      <h3>Department Wise Details</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Department</th>
+            <th>Students</th>
+            <th>Average CGPA</th>
+            <th>Placed</th>
+            <th>Placement Rate</th>
+            <th>Total Arrears</th>
+            <th>Hostellers</th>
+            <th>Day Scholars</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% batch.departmentBreakdown.forEach((row) => { %>
+            <tr>
+              <td><strong><%= row.department %></strong></td>
+              <td><%= row.totalStudents %></td>
+              <td><%= Number(row.avgCgpa || 0).toFixed(2) %></td>
+              <td><%= row.placedCount %></td>
+              <td><%= row.placementRate %>%</td>
+              <td><%= row.arrearCount %></td>
+              <td><%= row.hostellers %></td>
+              <td><%= row.dayScholars %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="grid cards-2">
+      <section class="card">
+        <h3>Top Rank Students</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Name</th>
+              <th>Department</th>
+              <th>CGPA</th>
+              <th>Placement</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% batch.topRankedStudents.forEach((student) => { %>
+              <tr>
+                <td><strong><%= student.batchRank %></strong></td>
+                <td><%= student.name %></td>
+                <td><%= student.department %></td>
+                <td><%= Number(student.cgpa_overall || 0).toFixed(2) %></td>
+                <td><%= student.placementStatus %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="card">
+        <h3>Placement And Academic Snapshot</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Rank</th>
+              <th>Company</th>
+              <th>Package</th>
+              <th>Arrears</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% batch.students.slice(0, 8).forEach((student) => { %>
+              <tr>
+                <td><%= student.name %></td>
+                <td><%= student.batchRank %></td>
+                <td><%= student.company %></td>
+                <td><%= student.packageLpa ? `${student.packageLpa} LPA` : '-' %></td>
+                <td><%= student.arrearCount %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </section>
+    </section>
+
+    <section class="card">
+      <h3>Student Wise Batch Details</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Department</th>
+            <th>Rank</th>
+            <th>CGPA</th>
+            <th>Placement Status</th>
+            <th>Arrear Count</th>
+            <th>No History Of Arrear</th>
+            <th>Residence</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% batch.students.forEach((student) => { %>
+            <tr>
+              <td><%= student.student_id %></td>
+              <td><strong><%= student.name %></strong></td>
+              <td><%= student.department %></td>
+              <td><%= student.batchRank %></td>
+              <td><%= Number(student.cgpa_overall || 0).toFixed(2) %></td>
+              <td><%= student.placementStatus %></td>
+              <td><%= student.arrearCount %></td>
+              <td><%= student.noHistoryOfArrear ? 'Yes' : 'No' %></td>
+              <td><%= student.residenceType %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </section>
+  </section>
+<% }) %>
+
+<%- include('../partials/layout-bottom') %>
